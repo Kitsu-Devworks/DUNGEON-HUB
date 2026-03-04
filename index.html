@@ -11,37 +11,107 @@
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     
     <style>
-        :root { --p-glow: #bc13fe; --led-cyan: #00f2ff; }
-        body { font-family: 'Orbitron', sans-serif; background: radial-gradient(circle at center, #0a0a1a 0%, #020205 100%); height: 100vh; margin: 0; display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative; }
+        :root { --p-glow: #bc13fe; }
+        
+        body { 
+            font-family: 'Orbitron', sans-serif; 
+            background: radial-gradient(circle at center, #0a0a1a 0%, #020205 100%); 
+            height: 100vh; margin: 0; 
+            display: flex; align-items: center; justify-content: center; 
+            overflow: hidden; 
+            position: relative;
+        }
 
-        .fixed-logo-index { position: fixed; bottom: 20px; right: 80px; width: 150px; opacity: 0.8; filter: drop-shadow(0 0 15px var(--p-glow)); pointer-events: none; }
+        /* TU LOGO A 80px DE LA DERECHA */
+        .fixed-logo-index { 
+            position: fixed; 
+            bottom: 20px; 
+            right: 80px; 
+            width: 150px; 
+            height: auto; 
+            opacity: 0.8; 
+            filter: drop-shadow(0 0 15px var(--p-glow)); 
+            pointer-events: none; 
+        }
 
-        .main-wrapper { display: flex; align-items: center; gap: 25px; }
+        .main-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 25px;
+        }
 
+        /* TU TARJETA GLASS MORADA */
         .glass-card { 
             background: rgba(0, 0, 0, 0.85); 
             backdrop-filter: blur(25px); 
             border: 2px solid rgba(188, 19, 254, 0.3); 
-            width: 420px; padding: 3rem; border-radius: 3rem; 
+            width: 420px; 
+            padding: 3rem; 
+            border-radius: 3rem; 
             box-shadow: 0 0 50px rgba(188, 19, 254, 0.15);
         }
 
-        .hub-title { background: linear-gradient(90deg, #bc13fe, #00f2ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 900; font-style: italic; letter-spacing: 4px; filter: drop-shadow(0 0 10px rgba(188, 19, 254, 0.5)); }
-
-        .rooms-sidebar { 
-            width: 165px; background: rgba(0, 0, 0, 0.7); border: 1px solid rgba(188, 19, 254, 0.2); border-left: 4px solid var(--p-glow); 
-            padding: 20px; border-radius: 0 25px 25px 0; backdrop-filter: blur(15px); height: 380px; overflow-y: auto; 
+        .hub-title {
+            background: linear-gradient(90deg, #bc13fe, #00f2ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 900;
+            font-style: italic;
+            letter-spacing: 4px;
+            filter: drop-shadow(0 0-10px rgba(188, 19, 254, 0.5));
         }
 
-        .pro-input { background: rgba(0, 0, 0, 0.6); border: 1px solid rgba(188, 19, 254, 0.3); color: white; padding: 14px; border-radius: 15px; width: 100%; font-family: 'JetBrains Mono'; outline: none; transition: 0.3s; text-align: center; font-size: 13px; }
-        .pro-input:focus { border-color: var(--p-glow); box-shadow: 0 0 15px rgba(188, 19, 254, 0.4); }
+        /* SIDEBAR DE SALAS ACTIVAS */
+        .rooms-sidebar { 
+            width: 160px; 
+            background: rgba(0, 0, 0, 0.7); 
+            border: 1px solid rgba(188, 19, 254, 0.2); 
+            border-left: 4px solid var(--p-glow); 
+            padding: 20px; 
+            border-radius: 0 25px 25px 0; 
+            backdrop-filter: blur(15px);
+            height: 380px;
+            overflow-y: auto;
+        }
 
-        .btn-login { background: var(--p-glow); color: white; font-weight: 900; padding: 16px; border-radius: 15px; width: 100%; transition: 0.3s; letter-spacing: 3px; box-shadow: 0 0 25px rgba(188, 19, 254, 0.5); margin-top: 1rem; }
-        .btn-login:hover { transform: translateY(-2px); filter: brightness(1.2); }
+        .pro-input {
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid rgba(188, 19, 254, 0.3);
+            color: white;
+            padding: 14px;
+            border-radius: 15px;
+            width: 100%;
+            font-family: 'JetBrains Mono';
+            outline: none;
+            transition: 0.3s;
+            text-align: center;
+        }
 
-        .room-item { font-size: 10px; color: #bc13fe; margin-bottom: 12px; font-family: 'JetBrains Mono'; display: flex; align-items: center; gap: 8px; font-weight: bold; text-transform: uppercase; }
-        .online-dot { width: 7px; height: 7px; background: #00ff88; border-radius: 50%; box-shadow: 0 0 8px #00ff88; animation: pulse 2s infinite; }
-        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+        .btn-login {
+            background: var(--p-glow);
+            color: white;
+            font-weight: 900;
+            padding: 16px;
+            border-radius: 15px;
+            width: 100%;
+            transition: 0.3s;
+            letter-spacing: 3px;
+            box-shadow: 0 0 25px rgba(188, 19, 254, 0.5);
+            margin-top: 1rem;
+        }
+
+        .room-item {
+            font-size: 11px;
+            color: #bc13fe;
+            margin-bottom: 12px;
+            font-family: 'JetBrains Mono';
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        .online-dot { width: 7px; height: 7px; background: #00ff88; border-radius: 50%; box-shadow: 0 0 8px #00ff88; }
     </style>
 </head>
 <body>
@@ -72,25 +142,21 @@
         <div class="rooms-sidebar">
             <div class="text-[9px] text-purple-400 font-black mb-5 uppercase tracking-tighter border-b border-purple-500/20 pb-2">Salas Activas</div>
             <div id="activeRooms">
-                <div class="text-[8px] text-white/20 italic">Buscando señales...</div>
+                <div class="text-[8px] text-white/20 italic">Buscando...</div>
             </div>
         </div>
     </div>
 
     <script>
         const activeRoomsData = {};
-
-        // Configuración de Pusher (Igual a tu Worker)
         const pusher = new Pusher('78831e6e7f703ddd4fb2', { cluster: 'us2', forceTLS: true });
-        
-        // El Index se suscribe al lobby global para "ver" quién está activo
         const channel = pusher.subscribe('dungeon-lobby-global');
 
+        // Escuchar los pulsos de las salas
         channel.bind('client-sos', (data) => {
-            const payload = typeof data === 'string' ? JSON.parse(data) : data;
-            // Si el mensaje trae un roomName, lo registramos como sala activa
-            if (payload.roomName) {
-                activeRoomsData[payload.roomName] = Date.now();
+            let payload = typeof data === 'string' ? JSON.parse(data) : data;
+            if (payload && payload.roomName) {
+                activeRoomsData[payload.roomName.toUpperCase()] = Date.now();
                 renderRooms();
             }
         });
@@ -99,16 +165,14 @@
             const container = document.getElementById('activeRooms');
             const now = Date.now();
             let html = '';
-            
             for (const room in activeRoomsData) {
-                // Si hace más de 30 segundos no recibimos pulso, la sala se considera cerrada
-                if (now - activeRoomsData[room] > 30000) {
+                // Si no recibimos pulso en 35 seg, la quitamos
+                if (now - activeRoomsData[room] > 35000) {
                     delete activeRoomsData[room];
                     continue;
                 }
                 html += `<div class="room-item"><div class="online-dot"></div>${room}</div>`;
             }
-            
             container.innerHTML = html || '<div class="text-[8px] text-white/20 italic">No hay salas...</div>';
         }
 
@@ -122,9 +186,7 @@
         }
 
         document.addEventListener('keypress', (e) => { if (e.key === 'Enter') enterRoom(); });
-        
-        // Limpiar salas inactivas cada 5 segundos
-        setInterval(renderRooms, 5000);
+        setInterval(renderRooms, 5000); // Limpieza automática
     </script>
 </body>
 </html>
