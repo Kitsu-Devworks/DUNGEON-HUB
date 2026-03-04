@@ -38,15 +38,12 @@
 
         .order-btn { width: 65px; background: rgba(0,0,0,0.4); border: 1px solid rgba(188, 19, 254, 0.2); border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; color: var(--led-cyan); }
 
+        /* ONLINE SIDEBAR CON PARPADEO */
         .online-sidebar { position: absolute; right: -135px; top: 100px; width: 125px; background: rgba(0, 0, 0, 0.6); border: 1px solid rgba(188, 19, 254, 0.2); border-left: 3px solid var(--p-glow); padding: 12px; border-radius: 0 15px 15px 0; backdrop-filter: blur(10px); }
         .online-dot { width: 6px; height: 6px; background: #00ff88; border-radius: 50%; box-shadow: 0 0 8px #00ff88; animation: pulse-slow 2s infinite; }
         @keyframes pulse-slow { 0%, 100% { opacity: 1; filter: brightness(1.2); } 50% { opacity: 0.4; filter: brightness(0.8); } }
 
-        /* TIMER EFECTOS */
-        #timer-display { font-family: 'JetBrains Mono'; font-weight: 700; font-size: 1.8rem; color: var(--led-cyan); text-shadow: 0 0 15px var(--led-cyan); transition: all 0.2s; }
-        .timer-critical { color: var(--led-red) !important; text-shadow: 0 0 20px var(--led-red) !important; animation: shake 0.2s infinite; }
-        @keyframes shake { 0% { transform: translate(1px, 1px); } 25% { transform: translate(-1px, -1px); } 50% { transform: translate(-1px, 1px); } 75% { transform: translate(1px, -1px); } 100% { transform: translate(1px, 1px); } }
-
+        /* BOTONES */
         .btn-raid, .btn-way { opacity: 0.15; pointer-events: none; transition: all 0.3s; filter: grayscale(1); }
         .enabled { opacity: 1 !important; pointer-events: auto !important; filter: grayscale(0) !important; }
 
@@ -57,7 +54,13 @@
 
         .btn-way { width: 100%; padding: 16px; border-radius: 15px; border: 2px solid var(--p-glow); color: var(--p-glow); background: rgba(188, 19, 254, 0.1); font-weight: 900; text-transform: uppercase; font-size: 11px; margin-top: 10px; }
 
+        /* TIMER EFECTOS */
+        #timer-display { font-family: 'JetBrains Mono'; font-weight: 700; font-size: 1.8rem; color: var(--led-cyan); text-shadow: 0 0 15px var(--led-cyan); transition: all 0.2s; }
+        .timer-critical { color: var(--led-red) !important; text-shadow: 0 0 20px var(--led-red) !important; animation: shake 0.2s infinite; }
+        @keyframes shake { 0% { transform: translate(1px, 1px); } 25% { transform: translate(-1px, -1px); } 50% { transform: translate(-1px, 1px); } 75% { transform: translate(1px, -1px); } 100% { transform: translate(1px, 1px); } }
+
         .log-container { background: rgba(0, 0, 0, 0.5); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 1.2rem; font-family: 'JetBrains Mono'; font-size: 0.75rem; padding: 1rem; flex-grow: 1; overflow-y: auto; }
+        
         .exit-btn { font-size: 8px; font-weight: 900; color: #ff3e3e; border: 1px solid rgba(255, 62, 62, 0.3); padding: 4px 8px; border-radius: 8px; margin-top: 12px; cursor: pointer; }
     </style>
 </head>
@@ -127,7 +130,7 @@
         if (!ROOM_ID) window.location.href = 'index.html';
         document.getElementById('roomDisplay').innerText = `SALA PRIVADA: ${ROOM_ID}`;
 
-        let currentMode = 'SL', currentOrder = 'DR', isTimerActive = false, onlineUsers = {};
+        let currentMode = 'SL', currentOrder = 'DR', isTimerActive = false, onlineUsers = {}, hasConfirmedWay = false;
         const nameField = document.getElementById('userName');
         const volControl = document.getElementById('volControl');
         const soundUrls = { EASY: "https://assets.mixkit.co/active_storage/sfx/2567/2567-preview.mp3", MEDIUM: "https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3", HARD: "https://assets.mixkit.co/active_storage/sfx/2573/2573-preview.mp3", WAY: "https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3" };
@@ -169,17 +172,28 @@
         async function sendSignal(type) {
             const user = nameField.value.trim();
             if (user.length < 2) return;
+
+            // ANTISPAM: Bloquear el botón de "WAY" tras el primer clic
+            if (type === 'WAY') {
+                if (hasConfirmedWay) return;
+                hasConfirmedWay = true;
+                updateUI();
+            }
+
             try {
                 await fetch(CLOUDFLARE_URL, {
                     method: 'POST',
                     body: JSON.stringify({ user: `${user}|${type}|${currentMode}|${currentOrder}`, roomId: ROOM_ID, pin: ROOM_PIN })
                 });
-            } catch (e) {}
+            } catch (e) {
+                if (type === 'WAY') hasConfirmedWay = false;
+            }
         }
 
         function startTimer() {
             clearInterval(window.countdown);
             isTimerActive = true; 
+            hasConfirmedWay = false; // Resetear el estado para la nueva petición
             updateUI();
             let s = 30;
             const display = document.getElementById('timer-display');
@@ -189,12 +203,7 @@
             window.countdown = setInterval(() => {
                 s--; 
                 document.getElementById('timer-count').innerText = s;
-                
-                // EFECTO CRÍTICO A LOS 10 SEGUNDOS
-                if (s <= 10) {
-                    display.classList.add('timer-critical');
-                }
-
+                if (s <= 10) display.classList.add('timer-critical');
                 if (s <= 0) { 
                     clearInterval(window.countdown); 
                     isTimerActive = false; 
@@ -208,7 +217,10 @@
         function updateUI() {
             const hasName = nameField.value.trim().length >= 2;
             document.querySelectorAll('.btn-raid').forEach(b => b.classList.toggle('enabled', hasName && !isTimerActive));
-            document.getElementById('wayBtn').classList.toggle('enabled', hasName && isTimerActive);
+            
+            // Lógica del botón WAY con antispam
+            const wayBtn = document.getElementById('wayBtn');
+            wayBtn.classList.toggle('enabled', hasName && isTimerActive && !hasConfirmedWay);
         }
 
         function renderOnline() {
