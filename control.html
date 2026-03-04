@@ -1,241 +1,35 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Dungeon Control | Kitsu DevWorks</title>
-    
-    <link rel="icon" type="image/png" href="KitsuLogoMini.png">
-    <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
-    
-    <style>
-        :root { --led-green: #00ff88; --led-yellow: #facc15; --led-red: #ff3e3e; --led-cyan: #00f2ff; --p-glow: #bc13fe; }
-        
-        body { font-family: 'Orbitron', sans-serif; background: radial-gradient(circle at center, #0a0a1a 0%, #020205 100%); min-height: 100vh; margin: 0; display: flex; align-items: center; justify-content: center; position: relative; padding: 20px 0; overflow-x: hidden; }
-        
-        .pro-title { background: linear-gradient(90deg, #00f2ff, #bc13fe); -webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow(0 0 10px rgba(188, 19, 254, 0.3)); letter-spacing: 2px; }
+<style>
+    /* ... Tus estilos anteriores ... */
 
-        .fixed-logo { position: fixed; bottom: 20px; right: 20px; width: 100px; height: auto; opacity: 0.6; z-index: 100; filter: drop-shadow(0 0 15px var(--led-cyan)); pointer-events: none; }
+    .app-container { 
+        position: relative; 
+        width: 100%; 
+        max-width: 450px; /* Aquí está el truco: en PC es 450, en móvil es el 100% */
+        display: flex; 
+        justify-content: center; 
+        align-items: center; 
+    }
 
-        .app-container { position: relative; width: 100%; max-width: 450px; display: flex; flex-direction: column; align-items: center; padding: 0 15px; }
+    .main-card { 
+        width: 100%; /* Cambiado de 450px a 100% */
+        max-width: 450px;
+        height: 95vh; 
+        /* ... resto de tu estilo ... */
+    }
 
-        .glass-panel { background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(25px); border: 2px solid rgba(188, 19, 254, 0.2); width: 100%; height: auto; min-height: 80vh; max-height: 90vh; border-radius: 2.5rem; display: flex; flex-direction: column; padding: 1.5rem; box-sizing: border-box; overflow: hidden; z-index: 10; }
-
-        /* RESPONSIVE SIDEBARS */
-        .vol-sidebar { position: absolute; left: -70px; top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; align-items: center; width: 60px; }
-        .online-sidebar { position: absolute; right: -130px; top: 50px; width: 120px; background: rgba(0, 0, 0, 0.6); border: 1px solid rgba(188, 19, 254, 0.2); border-left: 3px solid var(--p-glow); padding: 10px; border-radius: 0 15px 15px 0; backdrop-filter: blur(10px); }
-
-        @media (max-width: 768px) {
-            .vol-sidebar { position: relative; left: 0; top: 0; transform: none; flex-direction: row; width: 100%; justify-content: center; gap: 15px; margin-bottom: 15px; }
-            .vol-label { margin-bottom: 0 !important; }
-            .slider-wrapper { transform: none; width: 150px; height: auto; }
-            .online-sidebar { position: relative; right: 0; top: 0; width: 100%; border-radius: 15px; border-left: 1px solid rgba(188, 19, 254, 0.2); border-top: 3px solid var(--p-glow); margin-top: 15px; order: 10; }
-            .fixed-logo { width: 70px; bottom: 10px; right: 10px; }
-            .glass-panel { min-height: auto; max-height: none; }
+    /* ESTO ES LO ÚNICO QUE AGREGO PARA EL MÓVIL */
+    @media (max-width: 768px) {
+        .vol-sidebar { 
+            position: relative; left: 0; transform: none; 
+            flex-direction: row; width: 100%; margin-bottom: 10px; 
         }
-
-        .vol-label { font-family: 'JetBrains Mono'; font-weight: bold; font-size: 11px; color: var(--led-cyan); text-shadow: 0 0 8px var(--led-cyan); margin-bottom: 90px; }
-        .slider-wrapper { transform: rotate(-90deg); width: 200px; height: 20px; display: flex; align-items: center; justify-content: center; }
-        
-        input[type=range].compat-slider { -webkit-appearance: none; width: 100%; height: 6px; background: rgba(0, 0, 0, 0.6); border: 1px solid rgba(188, 19, 254, 0.4); border-radius: 10px; outline: none; cursor: pointer; }
-        input[type=range].compat-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; background: var(--p-glow); border: 2px solid #fff; border-radius: 4px; box-shadow: 0 0 10px var(--p-glow); }
-
-        .game-selector-container { display: flex; gap: 8px; width: 100%; margin-bottom: 10px; }
-        .game-selector { display: flex; background: rgba(0,0,0,0.4); border: 1px solid rgba(188, 19, 254, 0.2); border-radius: 12px; padding: 4px; flex-grow: 1; }
-        .game-opt { flex: 1; padding: 8px; font-size: 9px; color: rgba(255,255,255,0.3); cursor: pointer; transition: 0.3s; text-align: center; border-radius: 8px; font-weight: 900; }
-        .game-opt.active { background: var(--p-glow); color: #fff; box-shadow: 0 0 10px var(--p-glow); }
-
-        .order-btn { width: 60px; background: rgba(0,0,0,0.4); border: 1px solid rgba(188, 19, 254, 0.2); border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; color: var(--led-cyan); }
-
-        .btn-raid, .btn-way { opacity: 0.15; pointer-events: none; transition: all 0.3s; filter: grayscale(1); }
-        .enabled { opacity: 1 !important; pointer-events: auto !important; filter: grayscale(0) !important; }
-
-        .btn-raid { width: 75px; height: 75px; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 3px solid transparent; }
-        .btn-easy { border-color: var(--led-green); color: var(--led-green); }
-        .btn-medium { border-color: var(--led-yellow); color: var(--led-yellow); }
-        .btn-hard { border-color: var(--led-red); color: var(--led-red); }
-
-        .btn-way { width: 100%; padding: 14px; border-radius: 15px; border: 2px solid var(--p-glow); color: var(--p-glow); background: rgba(188, 19, 254, 0.1); font-weight: 900; text-transform: uppercase; font-size: 10px; margin-top: 10px; }
-
-        .timer-block { height: 40px; display: flex; align-items: center; justify-content: center; margin: 5px 0; }
-        #timer-display { font-family: 'JetBrains Mono'; font-weight: 700; font-size: 1.5rem; color: var(--led-cyan); }
-        
-        .log-container { background: rgba(0, 0, 0, 0.5); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 1.2rem; font-family: 'JetBrains Mono'; font-size: 0.7rem; padding: 0.8rem; flex-grow: 1; min-height: 150px; overflow-y: auto; color: var(--led-cyan); }
-        
-        .exit-btn { font-size: 8px; font-weight: 900; color: #ff3e3e; border: 1px solid rgba(255, 62, 62, 0.3); padding: 4px 8px; border-radius: 8px; margin: 10px 0; }
-    </style>
-</head>
-<body>
-
-    <img src="KitsuLogo2.png" alt="Kitsu" class="fixed-logo">
-
-    <div class="app-container">
-        <div class="vol-sidebar">
-            <span id="volLabel" class="vol-label">50%</span>
-            <div class="slider-wrapper">
-                <input type="range" id="volControl" class="compat-slider" min="0" max="1" step="0.01" value="0.5">
-            </div>
-        </div>
-
-        <div class="glass-panel">
-            <div class="text-center">
-                <p id="roomDisplay" class="text-[8px] text-purple-400/50 mb-1">CONNECTING...</p>
-                <h1 class="text-xl font-black italic mb-1 pro-title">DUNGEON CONTROL</h1>
-                <input type="text" id="userName" placeholder="NICKNAME" maxlength="8" class="bg-black/60 border border-purple-500/50 text-white text-[10px] p-2 rounded mb-3 font-mono outline-none w-2/3 text-center uppercase focus:border-purple-400">
-            </div>
-
-            <div class="game-selector-container">
-                <div class="game-selector">
-                    <div id="modeSL" class="game-opt active" onclick="setMode('SL')">SOLO LEVELING</div>
-                    <div id="modeOP" class="game-opt" onclick="setMode('OP')">ONE PIECE</div>
-                </div>
-                <div id="orderBtn" class="order-btn" onclick="toggleOrder()">
-                    <span class="text-[12px]">🔄</span>
-                    <span id="orderLabel" class="text-[8px] font-black mt-[-2px]">D ➜ R</span>
-                </div>
-            </div>
-
-            <div class="flex justify-around mb-3">
-                <button id="easyBtn" class="btn-raid btn-easy"><span class="text-xl">🛡️</span><span class="text-[8px] font-black mt-1">Easy</span></button>
-                <button id="medBtn" class="btn-raid btn-medium"><span class="text-xl">⚔️</span><span class="text-[8px] font-black mt-1">Medium</span></button>
-                <button id="hardBtn" class="btn-raid btn-hard"><span class="text-xl">💀</span><span class="text-[8px] font-black mt-1">Hard</span></button>
-            </div>
-
-            <button id="wayBtn" class="btn-way">🏃‍♂️ Confirmar en camino</button>
-
-            <div class="timer-block">
-                <div id="timer-display" class="opacity-0 transition-opacity">
-                    <span id="timer-count">30</span>s
-                </div>
-            </div>
-
-            <div id="log" class="log-container">> System Online...</div>
-            
-            <div class="flex justify-center">
-                <button onclick="exitRoom()" class="exit-btn">SALIR DE LA SALA</button>
-            </div>
-        </div>
-
-        <div class="online-sidebar">
-            <div class="text-[8px] opacity-50 mb-2 uppercase font-bold text-purple-400">Online (<span id="userCount">0</span>)</div>
-            <div id="userList" class="max-h-[100px] overflow-y-auto"></div>
-        </div>
-    </div>
-
-    <script>
-        const ROOM_ID = sessionStorage.getItem('dungeon_room');
-        const ROOM_PIN = sessionStorage.getItem('dungeon_pin');
-        const PUSHER_KEY = '78831e6e7f703ddd4fb2';
-        const CLOUDFLARE_URL = 'https://dungeon-hub-core.kitsu-devworks.workers.dev/';
-
-        if (!ROOM_ID) window.location.href = 'index.html';
-        document.getElementById('roomDisplay').innerText = `SALA PRIVADA: ${ROOM_ID}`;
-
-        let currentMode = 'SL', currentOrder = 'DR', isTimerActive = false, hasConfirmedWay = false, onlineUsers = {};
-
-        const nameField = document.getElementById('userName');
-        const diffButtons = document.querySelectorAll('.btn-raid');
-        const wayBtn = document.getElementById('wayBtn');
-        const timerDisplay = document.getElementById('timer-display');
-        const timerCount = document.getElementById('timer-count');
-        const volControl = document.getElementById('volControl');
-        const soundUrls = { EASY: "https://assets.mixkit.co/active_storage/sfx/2567/2567-preview.mp3", MEDIUM: "https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3", HARD: "https://assets.mixkit.co/active_storage/sfx/2573/2573-preview.mp3", WAY: "https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3" };
-
-        const pusher = new Pusher(PUSHER_KEY, { cluster: 'us2', forceTLS: true });
-        const channel = pusher.subscribe(`dungeon-room-${ROOM_ID}-${ROOM_PIN}`);
-
-        function playAlert(type) {
-            const url = soundUrls[type];
-            const currentVol = parseFloat(volControl.value);
-            if (!url || currentVol <= 0) return;
-            const audio = new Audio(url);
-            audio.volume = currentVol;
-            setTimeout(() => { audio.play().catch(() => {}); }, 10);
+        .slider-wrapper { transform: none; width: 150px; }
+        .vol-label { margin-bottom: 0 !important; margin-right: 10px; }
+        .online-sidebar { 
+            position: relative; right: 0; top: 0; width: 100%; 
+            border-radius: 15px; margin-top: 10px; 
         }
-
-        channel.bind('client-sos', (data) => {
-            let payload = typeof data === 'string' ? JSON.parse(data) : data;
-            if(!payload.user) return;
-            const [name, type, mode, order] = payload.user.split('|');
-            onlineUsers[name.toUpperCase()] = Date.now(); 
-            renderOnline();
-            if (type === 'PULSE') return;
-            playAlert(type);
-            const colors = { EASY: '#00ff88', MEDIUM: '#facc15', HARD: '#ff3e3e', WAY: '#00f2ff' };
-            if (type !== 'WAY') {
-                startTimer();
-                let msg = order === 'RD' ? `PIDE RAID Y DUNG ${type}` : `PIDE DUNG ${type} Y RAID`;
-                addLog(`[${mode}] ${name.toUpperCase()} ${msg}`, colors[type]);
-            } else {
-                addLog(`${name.toUpperCase()} VA EN CAMINO!`, colors.WAY);
-            }
-        });
-
-        async function sendSignal(type) {
-            const user = nameField.value.trim();
-            if (!user || user.length < 2) return;
-            if (type === 'WAY') { hasConfirmedWay = true; updateUI(); }
-            try { await fetch(CLOUDFLARE_URL, { method: 'POST', body: JSON.stringify({ user: `${user}|${type}|${currentMode}|${currentOrder}`, roomId: ROOM_ID, pin: ROOM_PIN }) }); } catch (e) {}
-        }
-
-        function startTimer() {
-            clearInterval(window.countdown);
-            isTimerActive = true; hasConfirmedWay = false; updateUI();
-            let s = 30;
-            timerDisplay.classList.remove('opacity-0');
-            timerCount.innerText = s;
-            window.countdown = setInterval(() => {
-                s--; timerCount.innerText = s;
-                if (s <= 0) { clearInterval(window.countdown); isTimerActive = false; timerDisplay.classList.add('opacity-0'); updateUI(); }
-            }, 1000);
-        }
-
-        function updateUI() {
-            const hasName = nameField.value.trim().length >= 2;
-            if (!hasName) { diffButtons.forEach(b => b.classList.remove('enabled')); wayBtn.classList.remove('enabled'); return; }
-            if (isTimerActive) {
-                diffButtons.forEach(b => b.classList.remove('enabled'));
-                (!hasConfirmedWay) ? wayBtn.classList.add('enabled') : wayBtn.classList.remove('enabled');
-            } else {
-                diffButtons.forEach(b => b.classList.add('enabled'));
-                wayBtn.classList.remove('enabled');
-            }
-        }
-
-        function renderOnline() {
-            const now = Date.now();
-            let html = '', count = 0;
-            for (let u in onlineUsers) {
-                if (now - onlineUsers[u] > 40000) { delete onlineUsers[u]; continue; }
-                html += `<div class="flex items-center gap-2 text-[9px] text-purple-400 mb-1"><div class="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse shadow-[0_0_5px_#00ff88]"></div>${u}</div>`;
-                count++;
-            }
-            document.getElementById('userList').innerHTML = html;
-            document.getElementById('userCount').innerText = count;
-        }
-
-        function addLog(msg, color) {
-            const log = document.getElementById('log');
-            const now = new Date();
-            const time = `[${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}]`;
-            log.innerHTML = `<div style="color:${color}">> ${time} ${msg}</div>` + log.innerHTML;
-        }
-
-        function setMode(mode) { currentMode = mode; document.getElementById('modeSL').classList.toggle('active', mode === 'SL'); document.getElementById('modeOP').classList.toggle('active', mode === 'OP'); }
-        function toggleOrder() { currentOrder = (currentOrder === 'DR') ? 'RD' : 'DR'; document.getElementById('orderLabel').innerText = (currentOrder === 'DR') ? 'D ➜ R' : 'R ➜ D'; }
-        function exitRoom() { sessionStorage.clear(); window.location.href = 'index.html'; }
-
-        nameField.addEventListener('input', updateUI);
-        volControl.addEventListener('input', (e) => document.getElementById('volLabel').innerText = Math.round(e.target.value * 100) + "%");
-        document.getElementById('easyBtn').onclick = () => sendSignal('EASY');
-        document.getElementById('medBtn').onclick = () => sendSignal('MEDIUM');
-        document.getElementById('hardBtn').onclick = () => sendSignal('HARD');
-        document.getElementById('wayBtn').onclick = () => sendSignal('WAY');
-        setInterval(() => { if (nameField.value.trim().length >= 2) sendSignal('PULSE'); }, 10000);
-        setInterval(renderOnline, 5000);
-        setInterval(() => { fetch(CLOUDFLARE_URL, { method: 'POST', body: JSON.stringify({ roomName: ROOM_ID }) }); }, 20000);
-    </script>
-</body>
-</html>
+        body { overflow-y: auto; display: block; padding: 20px; }
+        .app-container { margin: 0 auto; }
+    }
+</style>
