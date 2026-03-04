@@ -26,7 +26,7 @@
         .order-btn { width: 65px; background: rgba(0,0,0,0.4); border: 1px solid rgba(0,242,255,0.2); border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; color: var(--led-cyan); transition: 0.2s; }
         .order-text { font-size: 8px; font-weight: 900; margin-top: -2px; }
         .online-sidebar { position: absolute; right: -135px; top: 100px; width: 125px; background: rgba(0, 0, 0, 0.6); border: 1px solid rgba(0, 242, 255, 0.2); border-left: 3px solid var(--led-cyan); padding: 12px; border-radius: 0 15px 15px 0; backdrop-filter: blur(10px); }
-        .main-card { width: 450px; height: 95vh; max-height: 780px; background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(25px); border: 2px solid rgba(0, 242, 255, 0.2); border-radius: 2.5rem; display: flex; flex-direction: column; padding: 1rem; box-sizing: border-box; overflow: hidden; }
+        .main-card { width: 450px; height: 95vh; max-height: 780px; background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(25px); border: 2px solid rgba(0, 242, 255, 0.2); border-radius: 2.5rem; display: flex; flex-direction: column; padding: 1.5rem; box-sizing: border-box; overflow: hidden; }
         .btn-raid, .btn-way { opacity: 0.15; pointer-events: none; transition: all 0.3s; filter: grayscale(1); }
         .enabled { opacity: 1 !important; pointer-events: auto !important; filter: grayscale(0) !important; }
         .btn-raid { width: 85px; height: 85px; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 3px solid transparent; }
@@ -83,19 +83,32 @@
         document.getElementById('roomIDDisplay').innerText = `SALA: ${ROOM_ID}`;
 
         let currentMode = 'SL', currentOrder = 'DR', onlineUsers = {};
-        const soundUrls = { EASY: "https://assets.mixkit.co/active_storage/sfx/2567/2567-preview.mp3", MEDIUM: "https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3", HARD: "https://assets.mixkit.co/active_storage/sfx/2573/2573-preview.mp3", WAY: "https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3" };
+        const soundUrls = { 
+            EASY: "https://assets.mixkit.co/active_storage/sfx/2567/2567-preview.mp3", 
+            MEDIUM: "https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3", 
+            HARD: "https://assets.mixkit.co/active_storage/sfx/2573/2573-preview.mp3", 
+            WAY: "https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3" 
+        };
 
         const pusher = new Pusher('78831e6e7f703ddd4fb2', { cluster: 'us2' });
-        const channel = pusher.subscribe(`private-room-${ROOM_ID}-${ROOM_PIN}`);
+        // USAMOS EL MISMO CANAL QUE EL WORKER
+        const channel = pusher.subscribe(`dungeon-room-${ROOM_ID}-${ROOM_PIN}`);
 
         channel.bind('client-sos', (data) => {
-            const [name, type, mode, order] = data.user.split('|');
+            const parts = data.user ? data.user.split('|') : [];
+            if (parts.length === 0) return;
+            
+            const [name, type, mode, order] = parts;
             onlineUsers[name.toUpperCase()] = Date.now();
             renderOnline();
+            
             if (type === 'PULSE') return;
+
+            // Reproducir sonido
             const audio = new Audio(soundUrls[type]);
-            audio.volume = document.getElementById('volControl').value;
-            audio.play().catch(()=>{});
+            audio.volume = parseFloat(document.getElementById('volControl').value);
+            audio.play().catch(e => console.log("Audio bloqueado, interactúa con la web"));
+
             addLog(`[${mode}] ${name.toUpperCase()} ${type === 'WAY' ? 'VA EN CAMINO' : 'PIDE ' + type}`, type);
             if (type !== 'WAY') startTimer();
         });
@@ -105,37 +118,60 @@
             if (user.length < 2) return;
             await fetch(CLOUDFLARE_URL, {
                 method: 'POST',
-                body: JSON.stringify({ user: `${user}|${type}|${currentMode}|${currentOrder}`, roomId: ROOM_ID, pin: ROOM_PIN })
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    user: `${user}|${type}|${currentMode}|${currentOrder}`, 
+                    roomId: ROOM_ID, 
+                    pin: ROOM_PIN 
+                })
             });
         }
 
         function startTimer() {
-            let s = 30; document.getElementById('timer-display').classList.add('opacity-100');
+            let s = 30; 
+            document.getElementById('timer-count').innerText = s;
+            document.getElementById('timer-display').classList.add('opacity-100');
             const cd = setInterval(() => {
                 s--; document.getElementById('timer-count').innerText = s;
                 if (s <= 0) { clearInterval(cd); document.getElementById('timer-display').classList.remove('opacity-100'); }
             }, 1000);
         }
 
-        function setMode(m) { currentMode = m; document.getElementById('modeSL').classList.toggle('active', m === 'SL'); document.getElementById('modeOP').classList.toggle('active', m === 'OP'); }
-        function toggleOrder() { currentOrder = (currentOrder === 'DR') ? 'RD' : 'DR'; document.getElementById('orderLabel').innerText = (currentOrder === 'DR') ? 'D ➜ R' : 'R ➜ D'; }
+        function setMode(m) { 
+            currentMode = m; 
+            document.getElementById('modeSL').classList.toggle('active', m === 'SL'); 
+            document.getElementById('modeOP').classList.toggle('active', m === 'OP'); 
+        }
+
+        function toggleOrder() { 
+            currentOrder = (currentOrder === 'DR') ? 'RD' : 'DR'; 
+            document.getElementById('orderLabel').innerText = (currentOrder === 'DR') ? 'D ➜ R' : 'R ➜ D'; 
+        }
+
         function renderOnline() {
             let html = '', count = 0, now = Date.now();
             for (let u in onlineUsers) {
                 if (now - onlineUsers[u] > 35000) { delete onlineUsers[u]; continue; }
                 html += `<div class="text-[9px] text-cyan-400 mb-1">● ${u}</div>`; count++;
             }
-            document.getElementById('userList').innerHTML = html; document.getElementById('userCount').innerText = count;
+            document.getElementById('userList').innerHTML = html; 
+            document.getElementById('userCount').innerText = count;
         }
-        function addLog(m, t) { const l = document.getElementById('log'); l.innerHTML = `<div>> ${m}</div>` + l.innerHTML; }
+
+        function addLog(m, t) { 
+            const colors = { EASY: '#00ff88', MEDIUM: '#facc15', HARD: '#ff3e3e', WAY: '#00f2ff' };
+            const l = document.getElementById('log'); 
+            l.innerHTML = `<div style="color: ${colors[t] || '#00f2ff'}">> ${m}</div>` + l.innerHTML; 
+        }
 
         document.getElementById('userName').addEventListener('input', (e) => {
             const hasName = e.target.value.length >= 2;
             document.querySelectorAll('.btn-raid, #wayBtn').forEach(b => b.classList.toggle('enabled', hasName));
         });
 
+        // Pulsos de actividad y lobby
         setInterval(() => { if (document.getElementById('userName').value.length >= 2) sendSignal('PULSE'); }, 10000);
-        setInterval(() => { fetch(CLOUDFLARE_URL, { method: 'POST', body: JSON.stringify({ roomId: 'lobby-global', roomName: ROOM_ID }) }); }, 20000);
+        setInterval(() => { fetch(CLOUDFLARE_URL, { method: 'POST', body: JSON.stringify({ roomName: ROOM_ID }) }); }, 20000);
         
         document.getElementById('easyBtn').onclick = () => sendSignal('EASY');
         document.getElementById('medBtn').onclick = () => sendSignal('MEDIUM');
