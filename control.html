@@ -15,29 +15,26 @@
         
         body { font-family: 'Orbitron', sans-serif; background: radial-gradient(circle at center, #0a0a1a 0%, #020205 100%); height: 100vh; margin: 0; overflow: hidden; display: flex; align-items: center; justify-content: center; position: relative; }
         
-        /* TU TÍTULO MORADO GRADIENTE */
         .pro-title { background: linear-gradient(90deg, #00f2ff, #bc13fe); -webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow(0 0 10px rgba(188, 19, 254, 0.3)); letter-spacing: 2px; }
 
-        /* LOGO EN LA POSICIÓN QUE TE GUSTA (80px) */
+        /* LOGO A LA DERECHA (80px) */
         .fixed-logo { position: fixed; bottom: 20px; right: 80px; width: 150px; height: auto; opacity: 0.8; z-index: 100; filter: drop-shadow(0 0 15px var(--p-glow)); pointer-events: none; }
 
         .app-container { position: relative; width: 450px; display: flex; justify-content: center; align-items: center; }
 
-        /* TU PANEL GLASS ORIGINAL */
+        /* PANEL GLASS MORADO */
         .glass-panel { background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(25px); border: 2px solid rgba(188, 19, 254, 0.2); width: 450px; height: 95vh; max-height: 780px; border-radius: 2.5rem; display: flex; flex-direction: column; padding: 2rem; box-sizing: border-box; overflow: hidden; }
 
         .vol-sidebar { position: absolute; left: -90px; top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; align-items: center; width: 80px; }
         .vol-label { font-family: 'JetBrains Mono'; font-weight: bold; font-size: 11px; color: var(--led-cyan); text-shadow: 0 0 8px var(--led-cyan); margin-bottom: 90px; }
         .slider-wrapper { transform: rotate(-90deg); width: 200px; height: 20px; display: flex; align-items: center; justify-content: center; }
+        
         input[type=range].compat-slider { -webkit-appearance: none; width: 200px; height: 6px; background: rgba(0, 0, 0, 0.6); border: 1px solid rgba(188, 19, 254, 0.4); border-radius: 10px; outline: none; cursor: pointer; }
         input[type=range].compat-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; background: var(--p-glow); border: 2px solid #fff; border-radius: 4px; box-shadow: 0 0 10px var(--p-glow); }
 
-        .game-selector-container { display: flex; gap: 8px; width: 100%; margin-bottom: 10px; }
-        .game-selector { display: flex; background: rgba(0,0,0,0.4); border: 1px solid rgba(188, 19, 254, 0.2); border-radius: 12px; padding: 4px; flex-grow: 1; }
+        .game-selector { display: flex; background: rgba(0,0,0,0.4); border: 1px solid rgba(188, 19, 254, 0.2); border-radius: 12px; padding: 4px; flex-grow: 1; margin-bottom: 10px; }
         .game-opt { flex: 1; padding: 8px; font-size: 9px; color: rgba(255,255,255,0.3); cursor: pointer; transition: 0.3s; text-align: center; border-radius: 8px; font-weight: 900; }
         .game-opt.active { background: var(--p-glow); color: #fff; box-shadow: 0 0 10px var(--p-glow); }
-
-        .order-btn { width: 65px; background: rgba(0,0,0,0.4); border: 1px solid rgba(188, 19, 254, 0.2); border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; color: var(--led-cyan); }
 
         /* SIDEBAR ONLINE MORADA */
         .online-sidebar { position: absolute; right: -135px; top: 100px; width: 125px; background: rgba(0, 0, 0, 0.6); border: 1px solid rgba(188, 19, 254, 0.2); border-left: 3px solid var(--p-glow); padding: 12px; border-radius: 0 15px 15px 0; backdrop-filter: blur(10px); }
@@ -50,15 +47,11 @@
         .btn-medium { border-color: var(--led-yellow); color: var(--led-yellow); }
         .btn-hard { border-color: var(--led-red); color: var(--led-red); }
 
-        /* BOTÓN WAY MORADO */
         .btn-way { width: 100%; padding: 16px; border-radius: 15px; border: 2px solid var(--p-glow); color: var(--p-glow); background: rgba(188, 19, 254, 0.1); font-weight: 900; text-transform: uppercase; font-size: 11px; margin-top: 10px; }
-
-        .timer-block { height: 50px; width: 100%; display: flex; align-items: center; justify-content: center; margin: 2px 0; }
-        #timer-display { font-family: 'JetBrains Mono'; font-weight: 700; font-size: 1.8rem; color: var(--led-cyan); }
 
         .log-container { background: rgba(0, 0, 0, 0.5); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 1.2rem; font-family: 'JetBrains Mono'; font-size: 0.75rem; padding: 1rem; flex-grow: 1; overflow-y: auto; color: var(--led-cyan); }
         
-        .exit-btn { font-size: 8px; font-weight: 900; color: #ff3e3e; border: 1px solid rgba(255, 62, 62, 0.3); padding: 4px 8px; border-radius: 8px; margin-top: 12px; }
+        .exit-btn { font-size: 8px; font-weight: 900; color: #ff3e3e; border: 1px solid rgba(255, 62, 62, 0.3); padding: 4px 8px; border-radius: 8px; margin-top: 12px; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -80,15 +73,9 @@
                 <input type="text" id="userName" placeholder="NICKNAME" maxlength="8" class="bg-black/60 border border-purple-500/50 text-white text-[10px] p-2 rounded mb-3 font-mono outline-none w-2/3 text-center uppercase focus:border-purple-400">
             </div>
 
-            <div class="game-selector-container">
-                <div class="game-selector">
-                    <div id="modeSL" class="game-opt active" onclick="setMode('SL')">SOLO LEVELING</div>
-                    <div id="modeOP" class="game-opt" onclick="setMode('OP')">ONE PIECE</div>
-                </div>
-                <div id="orderBtn" class="order-btn" onclick="toggleOrder()">
-                    <span class="text-[12px]">🔄</span>
-                    <span id="orderLabel" class="text-[8px] font-black mt-[-2px]">D ➜ R</span>
-                </div>
+            <div class="game-selector">
+                <div id="modeSL" class="game-opt active" onclick="setMode('SL')">SOLO LEVELING</div>
+                <div id="modeOP" class="game-opt" onclick="setMode('OP')">ONE PIECE</div>
             </div>
 
             <div class="flex justify-between px-1 mb-3">
@@ -99,8 +86,8 @@
 
             <button id="wayBtn" class="btn-way">🏃‍♂️ Confirmar en camino</button>
 
-            <div class="timer-block">
-                <div id="timer-display" class="opacity-0 transition-opacity duration-300">
+            <div class="h-[50px] flex items-center justify-center">
+                <div id="timer-display" class="opacity-0 transition-opacity text-2xl font-bold text-cyan-400 font-mono">
                     <span id="timer-count">30</span>s
                 </div>
             </div>
@@ -108,7 +95,7 @@
             <div id="log" class="log-container">> System Online...</div>
             
             <div class="flex justify-center">
-                <button onclick="exitRoom()" class="exit-btn uppercase cursor-pointer">Salir de la sala</button>
+                <button onclick="exitRoom()" class="exit-btn uppercase">Salir de la sala</button>
             </div>
         </div>
 
@@ -121,90 +108,93 @@
     <script>
         const ROOM_ID = sessionStorage.getItem('dungeon_room');
         const ROOM_PIN = sessionStorage.getItem('dungeon_pin');
+        const CLOUDFLARE_URL = 'https://dungeon-hub-core.kitsu-devworks.workers.dev/'; 
         const PUSHER_KEY = '78831e6e7f703ddd4fb2';
-        const CLOUDFLARE_URL = 'https://dungeon-hub-core.kitsu-devworks.workers.dev/';
 
         if (!ROOM_ID) window.location.href = 'index.html';
         document.getElementById('roomDisplay').innerText = `SALA PRIVADA: ${ROOM_ID}`;
 
-        let currentMode = 'SL', currentOrder = 'DR', isTimerActive = false, hasConfirmedWay = false, onlineUsers = {};
-
+        let currentMode = 'SL', isTimerActive = false, onlineUsers = {};
         const nameField = document.getElementById('userName');
-        const diffButtons = document.querySelectorAll('.btn-raid');
-        const wayBtn = document.getElementById('wayBtn');
-        const timerDisplay = document.getElementById('timer-display');
-        const timerCount = document.getElementById('timer-count');
         const volControl = document.getElementById('volControl');
         const soundUrls = { EASY: "https://assets.mixkit.co/active_storage/sfx/2567/2567-preview.mp3", MEDIUM: "https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3", HARD: "https://assets.mixkit.co/active_storage/sfx/2573/2573-preview.mp3", WAY: "https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3" };
 
         const pusher = new Pusher(PUSHER_KEY, { cluster: 'us2', forceTLS: true });
         const channel = pusher.subscribe(`dungeon-room-${ROOM_ID}-${ROOM_PIN}`);
 
-        // --- FIX VOLUMEN ---
         function playAlert(type) {
-            const url = soundUrls[type];
-            const currentVol = parseFloat(volControl.value);
-            if (!url || currentVol <= 0) return;
-            const audio = new Audio(url);
-            audio.volume = currentVol;
-            setTimeout(() => { audio.play().catch(() => {}); }, 10);
+            const audio = new Audio(soundUrls[type]);
+            audio.volume = parseFloat(volControl.value);
+            audio.play().catch(() => {});
+        }
+
+        // LÓGICA DE PULSO PARA EL LOBBY (INDEX)
+        async function sendLobbyPulse() {
+            try {
+                await fetch(CLOUDFLARE_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ roomName: ROOM_ID, user: "PULSE" }),
+                    headers: { 'Content-Type': 'application/json' }
+                });
+            } catch (e) {}
         }
 
         channel.bind('client-sos', (data) => {
             let payload = typeof data === 'string' ? JSON.parse(data) : data;
-            if(!payload.user) return;
-            const [name, type, mode, order] = payload.user.split('|');
-            onlineUsers[name.toUpperCase()] = Date.now(); 
+            if(!payload.user || payload.user === 'PULSE') return;
+            const [name, type, mode] = payload.user.split('|');
+            onlineUsers[name.toUpperCase()] = Date.now();
             renderOnline();
-            if (type === 'PULSE') return;
-            playAlert(type);
-            const colors = { EASY: '#00ff88', MEDIUM: '#facc15', HARD: '#ff3e3e', WAY: '#00f2ff' };
-            if (type !== 'WAY') {
-                startTimer();
-                let msg = order === 'RD' ? `PIDE RAID Y DUNG ${type}` : `PIDE DUNG ${type} Y RAID`;
-                addLog(`[${mode}] ${name.toUpperCase()} ${msg}`, colors[type]);
-            } else {
-                addLog(`${name.toUpperCase()} VA EN CAMINO!`, colors.WAY);
+            if (type !== 'PULSE') {
+                playAlert(type);
+                addLog(`[${mode}] ${name.toUpperCase()} PIDE ${type}`, type === 'WAY' ? '#00f2ff' : '#bc13fe');
+                if (type !== 'WAY') startTimer();
             }
         });
 
         async function sendSignal(type) {
             const user = nameField.value.trim();
-            if (!user || user.length < 2) return;
-            if (type === 'WAY') { hasConfirmedWay = true; updateUI(); }
-            try { await fetch(CLOUDFLARE_URL, { method: 'POST', body: JSON.stringify({ user: `${user}|${type}|${currentMode}|${currentOrder}`, roomId: ROOM_ID, pin: ROOM_PIN }) }); } catch (e) {}
+            if (user.length < 2) return;
+            try {
+                await fetch(CLOUDFLARE_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ 
+                        user: `${user}|${type}|${currentMode}`, 
+                        roomId: ROOM_ID, 
+                        pin: ROOM_PIN 
+                    })
+                });
+            } catch (e) {}
         }
 
         function startTimer() {
             clearInterval(window.countdown);
-            isTimerActive = true; hasConfirmedWay = false; updateUI();
+            isTimerActive = true; updateUI();
             let s = 30;
-            timerDisplay.classList.replace('opacity-0', 'opacity-100');
-            timerCount.innerText = s;
+            const display = document.getElementById('timer-display');
+            display.classList.replace('opacity-0', 'opacity-100');
             window.countdown = setInterval(() => {
-                s--; timerCount.innerText = s;
-                if (s <= 0) { clearInterval(window.countdown); isTimerActive = false; timerDisplay.classList.replace('opacity-100', 'opacity-0'); updateUI(); }
+                s--; document.getElementById('timer-count').innerText = s;
+                if (s <= 0) { 
+                    clearInterval(window.countdown); 
+                    isTimerActive = false; 
+                    display.classList.replace('opacity-100', 'opacity-0'); 
+                    updateUI(); 
+                }
             }, 1000);
         }
 
         function updateUI() {
             const hasName = nameField.value.trim().length >= 2;
-            if (!hasName) { diffButtons.forEach(b => b.classList.remove('enabled')); wayBtn.classList.remove('enabled'); return; }
-            if (isTimerActive) {
-                diffButtons.forEach(b => b.classList.remove('enabled'));
-                (!hasConfirmedWay) ? wayBtn.classList.add('enabled') : wayBtn.classList.remove('enabled');
-            } else {
-                diffButtons.forEach(b => b.classList.add('enabled'));
-                wayBtn.classList.remove('enabled');
-            }
+            document.querySelectorAll('.btn-raid').forEach(b => b.classList.toggle('enabled', hasName && !isTimerActive));
+            document.getElementById('wayBtn').classList.toggle('enabled', hasName && isTimerActive);
         }
 
         function renderOnline() {
-            const now = Date.now();
             let html = '', count = 0;
             for (let u in onlineUsers) {
-                if (now - onlineUsers[u] > 40000) { delete onlineUsers[u]; continue; }
-                html += `<div class="flex items-center gap-2 text-[9px] text-purple-400 mb-1"><div class="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse shadow-[0_0_5px_#00ff88]"></div>${u}</div>`;
+                if (Date.now() - onlineUsers[u] > 40000) { delete onlineUsers[u]; continue; }
+                html += `<div class="flex items-center gap-2 text-[9px] text-purple-400 mb-1"><div class="w-1 h-1 bg-green-500 rounded-full"></div>${u}</div>`;
                 count++;
             }
             document.getElementById('userList').innerHTML = html;
@@ -213,13 +203,10 @@
 
         function addLog(msg, color) {
             const log = document.getElementById('log');
-            const now = new Date();
-            const time = `[${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}]`;
-            log.innerHTML = `<div style="color:${color}">> ${time} ${msg}</div>` + log.innerHTML;
+            log.innerHTML = `<div style="color:${color}">> ${msg}</div>` + log.innerHTML;
         }
 
         function setMode(mode) { currentMode = mode; document.getElementById('modeSL').classList.toggle('active', mode === 'SL'); document.getElementById('modeOP').classList.toggle('active', mode === 'OP'); }
-        function toggleOrder() { currentOrder = (currentOrder === 'DR') ? 'RD' : 'DR'; document.getElementById('orderLabel').innerText = (currentOrder === 'DR') ? 'D ➜ R' : 'R ➜ D'; }
         function exitRoom() { sessionStorage.clear(); window.location.href = 'index.html'; }
 
         nameField.addEventListener('input', updateUI);
@@ -228,8 +215,10 @@
         document.getElementById('medBtn').onclick = () => sendSignal('MEDIUM');
         document.getElementById('hardBtn').onclick = () => sendSignal('HARD');
         document.getElementById('wayBtn').onclick = () => sendSignal('WAY');
+        
+        setInterval(sendLobbyPulse, 15000);
+        sendLobbyPulse();
         setInterval(() => { if (nameField.value.trim().length >= 2) sendSignal('PULSE'); }, 10000);
-        setInterval(renderOnline, 5000);
     </script>
 </body>
 </html>
