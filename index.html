@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login | Kitsu DevWorks</title>
     
     <link rel="icon" type="image/png" href="KitsuLogoMini.png">
@@ -10,7 +10,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     
     <style>
-        :root { --p-glow: #bc13fe; --led-cyan: #00f2ff; }
+        :root { --led-cyan: #00f2ff; }
         
         body { 
             font-family: 'Orbitron', sans-serif; 
@@ -20,21 +20,20 @@
             overflow: hidden; 
         }
 
+        /* TU DISEÑO ORIGINAL */
         .glass-card { 
             background: rgba(0, 0, 0, 0.8); 
             backdrop-filter: blur(20px); 
-            border: 2px solid rgba(188, 19, 254, 0.2); 
-            width: 100%; 
-            max-width: 400px; 
+            border: 2px solid rgba(0, 242, 255, 0.2); 
+            width: 400px; 
             padding: 2.5rem; 
             border-radius: 2.5rem; 
-            box-shadow: 0 0 40px rgba(188, 19, 254, 0.1);
-            margin: 0 20px;
+            box-shadow: 0 0 40px rgba(0, 242, 255, 0.1);
         }
 
         .pro-input {
             background: rgba(0, 0, 0, 0.6);
-            border: 1px solid rgba(188, 19, 254, 0.3);
+            border: 1px solid rgba(0, 242, 255, 0.3);
             color: white;
             padding: 12px;
             border-radius: 12px;
@@ -43,32 +42,25 @@
             outline: none;
             transition: 0.3s;
             text-align: center;
-            text-transform: uppercase;
         }
 
-        .pro-input:focus { border-color: var(--p-glow); box-shadow: 0 0 15px rgba(188, 19, 254, 0.3); }
+        .pro-input:focus { border-color: var(--led-cyan); box-shadow: 0 0 15px rgba(0, 242, 255, 0.3); }
 
         .btn-login {
-            background: var(--p-glow);
-            color: white;
+            background: var(--led-cyan);
+            color: black;
             font-weight: 900;
             padding: 14px;
             border-radius: 12px;
             width: 100%;
             transition: 0.3s;
             letter-spacing: 2px;
-            box-shadow: 0 0 20px rgba(188, 19, 254, 0.4);
+            box-shadow: 0 0 20px rgba(0, 242, 255, 0.4);
         }
 
         .btn-login:hover { transform: scale(1.02); filter: brightness(1.2); }
         
-        .logo-main { width: 180px; margin: 0 auto 2rem; display: block; filter: drop-shadow(0 0 10px var(--p-glow)); }
-
-        /* Ajuste para móviles muy pequeños */
-        @media (max-width: 480px) {
-            .glass-card { padding: 1.5rem; }
-            .logo-main { width: 140px; }
-        }
+        .logo-main { width: 180px; margin: 0 auto 2rem; display: block; filter: drop-shadow(0 0 10px var(--led-cyan)); }
     </style>
 </head>
 <body>
@@ -76,23 +68,21 @@
     <div class="glass-card">
         <img src="KitsuLogo2.png" alt="Kitsu DevWorks" class="logo-main">
         
-        <h2 class="text-white text-center text-sm font-black italic mb-6 tracking-widest opacity-80">ACCESS GATEWAY</h2>
-        
         <div class="space-y-4">
             <div>
-                <label class="text-[9px] text-purple-400 ml-2 mb-1 block font-bold uppercase">Nombre de Sala</label>
-                <input type="text" id="roomName" placeholder="ROOM ID" class="pro-input">
+                <label class="text-[9px] text-cyan-400 ml-2 mb-1 block font-bold uppercase">Nombre de Sala</label>
+                <input type="text" id="roomName" placeholder="ROOM ID" class="pro-input uppercase">
             </div>
             
             <div>
-                <label class="text-[9px] text-purple-400 ml-2 mb-1 block font-bold uppercase">Pin de Acceso</label>
+                <label class="text-[9px] text-cyan-400 ml-2 mb-1 block font-bold uppercase">Pin de Acceso</label>
                 <input type="password" id="roomPin" placeholder="****" maxlength="4" class="pro-input">
             </div>
 
             <button onclick="enterRoom()" class="btn-login mt-4">INGRESAR</button>
         </div>
 
-        <p class="text-[8px] text-center text-white/20 mt-8 font-mono">KITSU DEVWORKS &copy; 2026<br>SECURE PROTOCOL ACTIVE</p>
+        <p class="text-[8px] text-center text-white/20 mt-8 font-mono">KITSU DEVWORKS &copy; 2026</p>
     </div>
 
     <script>
@@ -101,19 +91,17 @@
             const pin = document.getElementById('roomPin').value.trim();
 
             if (name.length < 3 || pin.length < 4) {
-                alert("DATOS INVÁLIDOS: Mínimo 3 caracteres para sala y 4 para PIN.");
+                alert("DATOS INVÁLIDOS");
                 return;
             }
 
+            // Guardamos para que el control.html sepa a dónde conectarse
             sessionStorage.setItem('dungeon_room', name);
             sessionStorage.setItem('dungeon_pin', pin);
             window.location.href = 'control.html';
         }
 
-        // Permitir entrar con la tecla Enter
-        document.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') enterRoom();
-        });
+        document.addEventListener('keypress', (e) => { if (e.key === 'Enter') enterRoom(); });
     </script>
 </body>
 </html>
