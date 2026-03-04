@@ -23,22 +23,28 @@
 
         .glass-panel { background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(25px); border: 2px solid rgba(188, 19, 254, 0.2); width: 450px; height: 95vh; max-height: 780px; border-radius: 2.5rem; display: flex; flex-direction: column; padding: 2rem; box-sizing: border-box; overflow: hidden; }
 
+        /* SIDEBAR VOLUMEN */
         .vol-sidebar { position: absolute; left: -90px; top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; align-items: center; width: 80px; }
         .vol-label { font-family: 'JetBrains Mono'; font-weight: bold; font-size: 11px; color: var(--led-cyan); text-shadow: 0 0 8px var(--led-cyan); margin-bottom: 90px; }
         .slider-wrapper { transform: rotate(-90deg); width: 200px; height: 20px; display: flex; align-items: center; justify-content: center; }
         input[type=range].compat-slider { -webkit-appearance: none; width: 200px; height: 6px; background: rgba(0, 0, 0, 0.6); border: 1px solid rgba(188, 19, 254, 0.4); border-radius: 10px; outline: none; cursor: pointer; }
         input[type=range].compat-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; background: var(--p-glow); border: 2px solid #fff; border-radius: 4px; box-shadow: 0 0 10px var(--p-glow); }
 
+        /* SELECTORES */
         .game-selector-container { display: flex; gap: 8px; width: 100%; margin-bottom: 10px; }
         .game-selector { display: flex; background: rgba(0,0,0,0.4); border: 1px solid rgba(188, 19, 254, 0.2); border-radius: 12px; padding: 4px; flex-grow: 1; }
         .game-opt { flex: 1; padding: 8px; font-size: 9px; color: rgba(255,255,255,0.3); cursor: pointer; transition: 0.3s; text-align: center; border-radius: 8px; font-weight: 900; }
         .game-opt.active { background: var(--p-glow); color: #fff; box-shadow: 0 0 10px var(--p-glow); }
 
-        /* EL BOTÓN DE ORDEN QUE TE QUITÉ */
-        .order-btn { width: 65px; background: rgba(0,0,0,0.4); border: 1px solid rgba(188, 19, 254, 0.2); border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; color: var(--led-cyan); }
+        .order-btn { width: 65px; background: rgba(0,0,0,0.4); border: 1px solid rgba(188, 19, 254, 0.2); border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; color: var(--led-cyan); transition: 0.3s; }
+        .order-btn:hover { border-color: var(--led-cyan); box-shadow: 0 0 10px rgba(0, 242, 255, 0.2); }
 
+        /* ONLINE SIDEBAR CON PARPADEO */
         .online-sidebar { position: absolute; right: -135px; top: 100px; width: 125px; background: rgba(0, 0, 0, 0.6); border: 1px solid rgba(188, 19, 254, 0.2); border-left: 3px solid var(--p-glow); padding: 12px; border-radius: 0 15px 15px 0; backdrop-filter: blur(10px); }
+        .online-dot { width: 6px; height: 6px; background: #00ff88; border-radius: 50%; box-shadow: 0 0 8px #00ff88; animation: pulse-slow 2s infinite; }
+        @keyframes pulse-slow { 0%, 100% { opacity: 1; filter: brightness(1.2); } 50% { opacity: 0.4; filter: brightness(0.8); } }
 
+        /* BOTONES */
         .btn-raid, .btn-way { opacity: 0.15; pointer-events: none; transition: all 0.3s; filter: grayscale(1); }
         .enabled { opacity: 1 !important; pointer-events: auto !important; filter: grayscale(0) !important; }
 
@@ -49,7 +55,10 @@
 
         .btn-way { width: 100%; padding: 16px; border-radius: 15px; border: 2px solid var(--p-glow); color: var(--p-glow); background: rgba(188, 19, 254, 0.1); font-weight: 900; text-transform: uppercase; font-size: 11px; margin-top: 10px; }
 
-        .log-container { background: rgba(0, 0, 0, 0.5); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 1.2rem; font-family: 'JetBrains Mono'; font-size: 0.75rem; padding: 1rem; flex-grow: 1; overflow-y: auto; color: var(--led-cyan); }
+        /* TIMER CON BRILLO */
+        #timer-display { font-family: 'JetBrains Mono'; font-weight: 700; font-size: 1.8rem; color: var(--led-cyan); text-shadow: 0 0 15px var(--led-cyan); }
+
+        .log-container { background: rgba(0, 0, 0, 0.5); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 1.2rem; font-family: 'JetBrains Mono'; font-size: 0.75rem; padding: 1rem; flex-grow: 1; overflow-y: auto; }
         
         .exit-btn { font-size: 8px; font-weight: 900; color: #ff3e3e; border: 1px solid rgba(255, 62, 62, 0.3); padding: 4px 8px; border-radius: 8px; margin-top: 12px; cursor: pointer; }
     </style>
@@ -93,12 +102,12 @@
             <button id="wayBtn" class="btn-way" onclick="sendSignal('WAY')">🏃‍♂️ Confirmar en camino</button>
 
             <div class="h-[50px] flex items-center justify-center">
-                <div id="timer-display" class="opacity-0 transition-opacity text-2xl font-bold text-cyan-400 font-mono">
+                <div id="timer-display" class="opacity-0 transition-opacity">
                     <span id="timer-count">30</span>s
                 </div>
             </div>
 
-            <div id="log" class="log-container">> System Online...</div>
+            <div id="log" class="log-container"></div>
             
             <div class="flex justify-center">
                 <button onclick="exitRoom()" class="exit-btn uppercase">Salir de la sala</button>
@@ -192,7 +201,7 @@
             let html = '', count = 0;
             for (let u in onlineUsers) {
                 if (Date.now() - onlineUsers[u] > 40000) { delete onlineUsers[u]; continue; }
-                html += `<div class="flex items-center gap-2 text-[9px] text-purple-400 mb-1"><div class="w-1 h-1 bg-green-500 rounded-full"></div>${u}</div>`;
+                html += `<div class="flex items-center gap-2 text-[9px] text-purple-400 mb-1"><div class="online-dot"></div>${u}</div>`;
                 count++;
             }
             document.getElementById('userList').innerHTML = html;
@@ -201,7 +210,9 @@
 
         function addLog(msg, color) {
             const log = document.getElementById('log');
-            log.innerHTML = `<div style="color:${color}">> ${msg}</div>` + log.innerHTML;
+            const now = new Date();
+            const timeStr = `[${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}]`;
+            log.innerHTML = `<div style="color:${color}; margin-bottom: 2px; font-family: 'JetBrains Mono';">> ${timeStr} ${msg}</div>` + log.innerHTML;
         }
 
         function setMode(mode) { currentMode = mode; document.getElementById('modeSL').classList.toggle('active', mode === 'SL'); document.getElementById('modeOP').classList.toggle('active', mode === 'OP'); }
@@ -214,6 +225,7 @@
         setInterval(sendLobbyPulse, 15000);
         sendLobbyPulse();
         setInterval(() => { if (nameField.value.trim().length >= 2) sendSignal('PULSE'); }, 10000);
+        addLog("System Online...", "#bc13fe");
     </script>
 </body>
 </html>
