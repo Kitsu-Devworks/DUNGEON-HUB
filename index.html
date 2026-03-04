@@ -10,7 +10,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     
     <style>
-        :root { --led-cyan: #00f2ff; }
+        :root { --p-glow: #bc13fe; }
         
         body { 
             font-family: 'Orbitron', sans-serif; 
@@ -18,22 +18,55 @@
             height: 100vh; margin: 0; 
             display: flex; align-items: center; justify-content: center; 
             overflow: hidden; 
+            position: relative;
         }
 
-        /* TU DISEÑO ORIGINAL */
+        /* POSICIÓN DEL LOGO QUE TE GUSTABA */
+        .fixed-logo-index { 
+            position: fixed; 
+            bottom: 20px; 
+            right: 80px; 
+            width: 150px; 
+            height: auto; 
+            opacity: 0.8; 
+            filter: drop-shadow(0 0 15px var(--p-glow)); 
+            pointer-events: none; 
+        }
+
+        .main-container {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            position: relative;
+        }
+
         .glass-card { 
             background: rgba(0, 0, 0, 0.8); 
             backdrop-filter: blur(20px); 
-            border: 2px solid rgba(0, 242, 255, 0.2); 
+            border: 2px solid rgba(188, 19, 254, 0.2); 
             width: 400px; 
             padding: 2.5rem; 
             border-radius: 2.5rem; 
-            box-shadow: 0 0 40px rgba(0, 242, 255, 0.1);
+            box-shadow: 0 0 40px rgba(188, 19, 254, 0.1);
+            z-index: 10;
+        }
+
+        /* SIDEBAR DE SALAS ONLINE */
+        .rooms-sidebar { 
+            width: 150px; 
+            background: rgba(0, 0, 0, 0.6); 
+            border: 1px solid rgba(188, 19, 254, 0.2); 
+            border-left: 3px solid var(--p-glow); 
+            padding: 15px; 
+            border-radius: 0 20px 20px 0; 
+            backdrop-filter: blur(10px);
+            max-height: 350px;
+            overflow-y: auto;
         }
 
         .pro-input {
             background: rgba(0, 0, 0, 0.6);
-            border: 1px solid rgba(0, 242, 255, 0.3);
+            border: 1px solid rgba(188, 19, 254, 0.3);
             color: white;
             padding: 12px;
             border-radius: 12px;
@@ -44,64 +77,88 @@
             text-align: center;
         }
 
-        .pro-input:focus { border-color: var(--led-cyan); box-shadow: 0 0 15px rgba(0, 242, 255, 0.3); }
+        .pro-input:focus { border-color: var(--p-glow); box-shadow: 0 0 15px rgba(188, 19, 254, 0.3); }
 
         .btn-login {
-            background: var(--led-cyan);
-            color: black;
+            background: var(--p-glow);
+            color: white;
             font-weight: 900;
             padding: 14px;
             border-radius: 12px;
             width: 100%;
             transition: 0.3s;
             letter-spacing: 2px;
-            box-shadow: 0 0 20px rgba(0, 242, 255, 0.4);
+            box-shadow: 0 0 20px rgba(188, 19, 254, 0.4);
         }
 
         .btn-login:hover { transform: scale(1.02); filter: brightness(1.2); }
-        
-        .logo-main { width: 180px; margin: 0 auto 2rem; display: block; filter: drop-shadow(0 0 10px var(--led-cyan)); }
+        .logo-card { width: 150px; margin: 0 auto 1.5rem; display: block; filter: drop-shadow(0 0 10px var(--p-glow)); }
+
+        .room-item {
+            font-size: 10px;
+            color: #bc13fe;
+            margin-bottom: 8px;
+            font-family: 'JetBrains Mono';
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .online-dot { width: 6px; height: 6px; background: #00ff88; border-radius: 50%; box-shadow: 0 0 5px #00ff88; }
     </style>
 </head>
 <body>
 
-    <div class="glass-card">
-        <img src="KitsuLogo2.png" alt="Kitsu DevWorks" class="logo-main">
-        
-        <div class="space-y-4">
-            <div>
-                <label class="text-[9px] text-cyan-400 ml-2 mb-1 block font-bold uppercase">Nombre de Sala</label>
-                <input type="text" id="roomName" placeholder="ROOM ID" class="pro-input uppercase">
-            </div>
+    <img src="KitsuLogo2.png" alt="Kitsu" class="fixed-logo-index">
+
+    <div class="main-container">
+        <div class="glass-card">
+            <img src="KitsuLogo2.png" alt="Kitsu DevWorks" class="logo-card">
             
-            <div>
-                <label class="text-[9px] text-cyan-400 ml-2 mb-1 block font-bold uppercase">Pin de Acceso</label>
-                <input type="password" id="roomPin" placeholder="****" maxlength="4" class="pro-input">
+            <h2 class="text-white text-center text-[10px] font-black italic mb-6 tracking-[0.3em] opacity-80 uppercase">Access Gateway</h2>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="text-[9px] text-purple-400 ml-2 mb-1 block font-bold uppercase">Nombre de Sala</label>
+                    <input type="text" id="roomName" placeholder="ROOM ID" class="pro-input uppercase">
+                </div>
+                
+                <div>
+                    <label class="text-[9px] text-purple-400 ml-2 mb-1 block font-bold uppercase">Pin de Acceso</label>
+                    <input type="password" id="roomPin" placeholder="****" maxlength="4" class="pro-input">
+                </div>
+
+                <button onclick="enterRoom()" class="btn-login mt-4">INGRESAR</button>
             </div>
 
-            <button onclick="enterRoom()" class="btn-login mt-4">INGRESAR</button>
+            <p class="text-[8px] text-center text-white/20 mt-8 font-mono">KITSU DEVWORKS &copy; 2026<br>SECURE PROTOCOL ACTIVE</p>
         </div>
 
-        <p class="text-[8px] text-center text-white/20 mt-8 font-mono">KITSU DEVWORKS &copy; 2026</p>
+        <div class="rooms-sidebar">
+            <div class="text-[8px] text-purple-400 font-black mb-4 uppercase tracking-widest">Salas Online</div>
+            <div id="activeRooms">
+                </div>
+        </div>
     </div>
 
     <script>
         function enterRoom() {
             const name = document.getElementById('roomName').value.trim().toUpperCase();
             const pin = document.getElementById('roomPin').value.trim();
-
-            if (name.length < 3 || pin.length < 4) {
-                alert("DATOS INVÁLIDOS");
-                return;
-            }
-
-            // Guardamos para que el control.html sepa a dónde conectarse
+            if (name.length < 3 || pin.length < 4) { alert("DATOS INVÁLIDOS"); return; }
             sessionStorage.setItem('dungeon_room', name);
             sessionStorage.setItem('dungeon_pin', pin);
             window.location.href = 'control.html';
         }
 
+        // Simulación de actualización de salas (aquí pondrías tu fetch a Cloudflare si lo necesitas)
+        function updateActiveRooms() {
+            // Ejemplo de cómo se vería
+            // const rooms = ['SALA-01', 'SALA-X']; 
+            // document.getElementById('activeRooms').innerHTML = rooms.map(r => `<div class="room-item"><div class="online-dot"></div>${r}</div>`).join('');
+        }
+
         document.addEventListener('keypress', (e) => { if (e.key === 'Enter') enterRoom(); });
+        updateActiveRooms();
     </script>
 </body>
 </html>
