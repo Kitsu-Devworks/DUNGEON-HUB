@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>DUNGEON HUB | Control Táctico</title>
+    
+    <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root { --led-cyan: #bc13fe; --led-green: #00ff88; --led-yellow: #facc15; --led-red: #ff3e3e; }
+        body { font-family: 'Orbitron', sans-serif; background: radial-gradient(circle at center, #1a0a2e 0%, #05010a 100%); height: 100vh; margin: 0; overflow: hidden; display: flex; align-items: center; justify-content: center; position: relative; color: white; }
+        .glass-card { background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(25px); border: 2px solid rgba(188, 19, 254, 0.2); border-radius: 2.5rem; width: 450px; height: 95vh; max-height: 780px; display: flex; flex-direction: column; padding: 1.5rem; box-sizing: border-box; }
+        .btn-raid { width: 85px; height: 85px; border-radius: 50%; border: 3px solid transparent; opacity: 0.2; pointer-events: none; transition: 0.3s; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .enabled { opacity: 1 !important; pointer-events: auto !important; }
+        .log-container { background: rgba(0, 0, 0, 0.5); border: 1px solid rgba(188, 19, 254, 0.1); border-radius: 1.2rem; font-family: 'JetBrains Mono'; font-size: 0.75rem; padding: 1rem; flex-grow: 1; overflow-y: auto; color: var(--led-cyan); }
+    </style>
+</head>
+<body>
+
+    <div class="glass-card">
+        <div class="text-center mb-4">
+            <h1 id="roomTitle" class="text-2xl font-black italic text-purple-400 uppercase tracking-tighter">SALA: ---</h1>
+            <p id="roomStatus" class="text-[9px] font-mono text-purple-300/50">> CONECTADO A FRECUENCIA PRIVADA</p>
+        </div>
+
+        <input type="text" id="userName" placeholder="NICKNAME" maxlength="8" class="bg-black/60 border border-purple-500/50 text-white text-[10px] p-2 rounded mb-6 font-mono outline-none w-2/3 mx-auto text-center uppercase focus:border-purple-400">
+
+        <div class="flex justify-around mb-6">
+            <button id="easyBtn" class="btn-raid border-[#00ff88] text-[#00ff88] shadow-[0_0_15px_rgba(0,255,136,0.2)]"><span class="text-2xl">🛡️</span><span class="text-[8px] font-black mt-1">EASY</span></button>
+            <button id="medBtn" class="btn-raid border-[#facc15] text-[#facc15] shadow-[0_0_15px_rgba(250,204,21,0.2)]"><span class="text-2xl">⚔️</span><span class="text-[8px] font-black mt-1">MEDIUM</span></button>
+            <button id="hardBtn" class="btn-raid border-[#ff3e3e] text-[#ff3e3e] shadow-[0_0_15px_rgba(255,62,62,0.2)]"><span class="text-2xl">💀</span><span class="text-[8px] font-black mt-1">HARD</span></button>
+        </div>
+
+        <div class="text-center mb-4">
+            <div id="timer-display" class="text-3xl font-bold opacity-0 transition-opacity text-purple-400 font-mono">
+                <span id="timer-count">30</span>s
+            </div>
+        </div>
+
+        <div id="log" class="log-container">> PROTOCOLO DUNGEON HUB INICIADO...</div>
+        
+        <button onclick="window.location.href='index.html'" class="mt-4 text-[10px] text-purple-500/50 hover:text-purple-400 font-mono uppercase tracking-widest">Desconectar Frecuencia</button>
+    </div>
+
+    <script>
+        // CONFIGURACIÓN RECUPERADA DEL LOBBY
+        const ROOM_ID = sessionStorage.getItem('dungeon_room');
+        const ROOM_PIN = sessionStorage.getItem('dungeon_pin');
+        const CLOUDFLARE_URL = 'https://dungeon-hub-core.kitsu-devworks.workers.dev/';
+
+        if (!ROOM_ID || !ROOM_PIN) { window.location.href = 'index.html'; }
+        document.getElementById('roomTitle').innerText = `SALA: ${ROOM_ID}`;
+
+        const pusher = new Pusher('78831e6e7f703ddd4fb2', { cluster: 'us2' });
+        const channel = pusher.subscribe(`private-room-${ROOM_ID}-${ROOM_PIN}`);
+
+        // Lógica de Sonidos y UI (Igual que antes)
+        const soundUrls = { 
+            EASY: "https://assets.mixkit.co/active_storage/sfx/2567/2567-preview.mp3", 
+            MEDIUM: "https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3", 
+            HARD: "https://assets.mixkit.co/active_storage/sfx/2573/2573-preview.mp3" 
+        };
+
+        channel.bind('client-sos', (data) => {
+            const [name, type] = data.user.split('|');
+            if (type === 'PULSE') return;
+            
+            new Audio(soundUrls[type]).play().catch(() => {});
+            addLog(`${name.toUpperCase()} PIDE AYUDA EN ${type}!`, type);
+            startTimer();
+        });
+
+        async function sendSignal(type) {
+            const user = document.getElementById('userName').value.trim();
+            if (!user) return;
+            await fetch(CLOUDFLARE_URL, {
+                method: 'POST',
+                body: JSON.stringify({ user: `${user}|${type}`, roomId: ROOM_ID, pin: ROOM_PIN })
+            });
+        }
+
+        // FUNCIÓN CLAVE: Anunciar sala al Lobby Global
+        async function broadcastToLobby() {
+            await fetch(CLOUDFLARE_URL, {
+                method: 'POST',
+                body: JSON.stringify({ 
+                    user: 'SYSTEM|PULSE', 
+                    roomId: 'lobby-global', // ID especial para el worker
+                    pin: 'public', 
+                    roomName: ROOM_ID 
+                })
+            }).catch(() => {});
+        }
+
+        function addLog(msg, type) {
+            const log = document.getElementById('log');
+            const colors = { EASY: '#00ff88', MEDIUM: '#facc15', HARD: '#ff3e3e' };
+            log.innerHTML = `<div style="color:${colors[type] || '#bc13fe'}">> ${msg}</div>` + log.innerHTML;
+        }
+
+        function startTimer() {
+            let s = 30;
+            const display = document.getElementById('timer-display');
+            display.classList.add('opacity-100');
+            const interval = setInterval(() => {
+                s--;
+                document.getElementById('timer-count').innerText = s;
+                if (s <= 0) { clearInterval(interval); display.classList.remove('opacity-100'); }
+            }, 1000);
+        }
+
+        // Eventos
+        document.getElementById('userName').addEventListener('input', (e) => {
+            const hasName = e.target.value.length >= 2;
+            document.querySelectorAll('.btn-raid').forEach(b => b.classList.toggle('enabled', hasName));
+        });
+
+        document.getElementById('easyBtn').onclick = () => sendSignal('EASY');
+        document.getElementById('medBtn').onclick = () => sendSignal('MEDIUM');
+        document.getElementById('hardBtn').onclick = () => sendSignal('HARD');
+
+        // Avisar al Lobby cada 20 segundos que seguimos activos
+        setInterval(broadcastToLobby, 20000);
+        broadcastToLobby();
+    </script>
+</body>
+</html>
