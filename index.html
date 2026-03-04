@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DUNGEON HUB | Lobby Táctico</title>
+    
+    <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root { --p-glow: #bc13fe; --p-dark: #0f021a; }
+        
+        body { 
+            font-family: 'Orbitron', sans-serif; 
+            background: radial-gradient(circle at center, #1a0a2e 0%, #05010a 100%);
+            color: white; height: 100vh; margin: 0; overflow: hidden;
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        .glass-panel {
+            background: rgba(15, 2, 26, 0.8);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(188, 19, 254, 0.3);
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.5), inset 0 0 10px rgba(188, 19, 254, 0.1);
+        }
+
+        .neon-input {
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid rgba(188, 19, 254, 0.4);
+            color: #f0abff;
+            font-family: 'JetBrains Mono';
+            transition: 0.3s;
+        }
+
+        .neon-input:focus {
+            border-color: var(--p-glow);
+            box-shadow: 0 0 15px var(--p-glow);
+            outline: none;
+        }
+
+        .room-card {
+            background: rgba(188, 19, 254, 0.05);
+            border: 1px solid rgba(188, 19, 254, 0.1);
+            transition: 0.3s italic;
+        }
+
+        .room-card:hover {
+            background: rgba(188, 19, 254, 0.15);
+            border-color: var(--p-glow);
+            transform: translateX(5px);
+            cursor: pointer;
+        }
+
+        /* Scrollbar personalizada para el estilo Cyberpunk */
+        .custom-scroll::-webkit-scrollbar { width: 4px; }
+        .custom-scroll::-webkit-scrollbar-track { background: transparent; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: var(--p-glow); border-radius: 10px; }
+    </style>
+</head>
+<body>
+
+    <div class="flex flex-col md:flex-row gap-8 w-full max-w-6xl px-6">
+        
+        <div class="w-full md:w-1/2 glass-panel p-10 rounded-[2.5rem] relative overflow-hidden">
+            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-purple-500 to-transparent opacity-50"></div>
+            
+            <h1 class="text-4xl font-black italic mb-2 tracking-tighter text-transparent bg-clip-text bg-gradient-to-br from-white via-purple-300 to-purple-600">
+                DUNGEON HUB
+            </h1>
+            <p class="text-[10px] text-purple-400 font-mono mb-10 tracking-[0.2em]">>> SELECCIONAR FRECUENCIA DE SALTO</p>
+
+            <div class="space-y-6">
+                <div>
+                    <label class="text-[10px] uppercase font-bold text-purple-300/60 ml-1 mb-2 block">ID de la Sala</label>
+                    <input type="text" id="roomName" placeholder="NOMBRE DEL EQUIPO" maxlength="14" class="w-full p-4 rounded-2xl neon-input uppercase text-sm tracking-widest">
+                </div>
+
+                <div>
+                    <label class="text-[10px] uppercase font-bold text-purple-300/60 ml-1 mb-2 block">PIN de Acceso</label>
+                    <input type="password" id="roomPin" placeholder="****" maxlength="4" class="w-full p-4 rounded-2xl neon-input text-center text-xl tracking-[0.8em]">
+                </div>
+
+                <button onclick="joinRoom()" class="w-full bg-purple-600 hover:bg-purple-500 text-white font-black py-5 rounded-2xl shadow-[0_10px_20px_rgba(188,19,254,0.3)] transition-all uppercase tracking-widest text-sm active:scale-95">
+                    Establecer Conexión
+                </button>
+            </div>
+        </div>
+
+        <div class="w-full md:w-1/2 glass-panel p-10 rounded-[2.5rem] flex flex-col">
+            <div class="flex justify-between items-center mb-8">
+                <h2 class="text-xs font-black uppercase tracking-widest text-purple-400">Salas Detectadas</h2>
+                <div class="flex items-center gap-2">
+                    <div class="w-2 h-2 bg-green-500 rounded-full animate-ping"></div>
+                    <span id="globalCount" class="text-[10px] font-mono text-green-400">0 SCANNING...</span>
+                </div>
+            </div>
+
+            <div id="roomList" class="flex-grow overflow-y-auto space-y-4 pr-3 custom-scroll">
+                <div class="text-center py-20 opacity-30 text-[10px] font-mono italic">
+                    Buscando transmisiones activas...
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const PUSHER_KEY = '78831e6e7f703ddd4fb2';
+        const pusher = new Pusher(PUSHER_KEY, { cluster: 'us2' });
+        
+        // Canal global para descubrir salas
+        const lobbyChannel = pusher.subscribe('dungeon-lobby-global');
+        let activeRooms = {};
+
+        // Escuchar pulsos de salas activas
+        lobbyChannel.bind('room-pulse', (data) => {
+            activeRooms[data.roomName] = { lastSeen: Date.now() };
+            renderRooms();
+        });
+
+        function renderRooms() {
+            const list = document.getElementById('roomList');
+            const countLabel = document.getElementById('globalCount');
+            const now = Date.now();
+            let html = '';
+            let count = 0;
+
+            for (let name in activeRooms) {
+                // Si la sala no reporta en 40 seg, se asume cerrada
+                if (now - activeRooms[name].lastSeen > 40000) {
+                    delete activeRooms[name];
+                    continue;
+                }
+                
+                count++;
+                html += `
+                    <div class="room-card p-5 rounded-2xl flex justify-between items-center group" onclick="selectRoom('${name}')">
+                        <div>
+                            <div class="text-[9px] text-purple-500 font-mono mb-1">FREQ_ID:</div>
+                            <div class="text-lg font-bold tracking-tighter group-hover:text-purple-300 transition-colors">${name.toUpperCase()}</div>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-[9px] text-green-500 font-bold mb-1">ONLINE</div>
+                            <div class="text-[8px] text-white/30 font-mono">ENCRIPTADA</div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            list.innerHTML = html || '<div class="text-center py-20 opacity-30 text-[10px] font-mono italic">Esperando señal de escuadrones...</div>';
+            countLabel.innerText = `${count} SALAS ACTIVAS`;
+        }
+
+        function selectRoom(name) {
+            document.getElementById('roomName').value = name;
+            document.getElementById('roomPin').focus();
+        }
+
+        function joinRoom() {
+            const name = document.getElementById('roomName').value.trim().toUpperCase();
+            const pin = document.getElementById('roomPin').value;
+
+            if (name.length < 3 || pin.length < 4) {
+                alert("ERROR DE PROTOCOLO: Nombre (mín. 3 caracteres) y PIN (4 dígitos) requeridos.");
+                return;
+            }
+
+            // Guardar datos de sesión
+            sessionStorage.setItem('dungeon_room', name);
+            sessionStorage.setItem('dungeon_pin', pin);
+
+            // Redirigir a la página de mando
+            window.location.href = 'control.html'; 
+        }
+
+        // Limpiar lista automáticamente
+        setInterval(renderRooms, 10000);
+    </script>
+</body>
+</html>
