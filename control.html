@@ -137,13 +137,20 @@
         const pusher = new Pusher(PUSHER_KEY, { cluster: 'us2', forceTLS: true });
         const channel = pusher.subscribe(`dungeon-room-${ROOM_ID}-${ROOM_PIN}`);
 
-        // --- FUNCIÓN PLAYALERT RESTAURADA ---
+        // --- LÓGICA DE VOLUMEN REPARADA ---
         function playAlert(type) {
             const url = soundUrls[type];
-            if (!url) return;
+            const currentVol = parseFloat(volControl.value);
+            
+            if (!url || currentVol <= 0) return; // Si es 0 o no hay URL, no hace nada
+            
             const audio = new Audio(url);
-            audio.volume = parseFloat(volControl.value);
-            audio.play().catch(e => console.log("Sound play error"));
+            audio.volume = currentVol;
+            
+            // Forzamos play con un pequeño delay para que el navegador capte el volumen
+            setTimeout(() => {
+                audio.play().catch(() => console.log("Interacción requerida"));
+            }, 10);
         }
 
         channel.bind('client-sos', (data) => {
@@ -154,7 +161,7 @@
             renderOnline();
             if (type === 'PULSE') return;
             
-            playAlert(type); // Llamada a la función restaurada
+            playAlert(type);
 
             const colors = { EASY: '#00ff88', MEDIUM: '#facc15', HARD: '#ff3e3e', WAY: '#00f2ff' };
             if (type !== 'WAY') {
