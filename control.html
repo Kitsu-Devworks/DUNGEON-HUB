@@ -17,17 +17,31 @@
         
         .pro-title { background: linear-gradient(90deg, #00f2ff, #bc13fe); -webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow(0 0 10px rgba(188, 19, 254, 0.3)); letter-spacing: 2px; }
 
-        /* LOGO: 150px y 80px a la izquierda */
+        /* LOGO: 150px y 80px a la izquierda (aprox 2cm más) */
         .fixed-logo { position: fixed; bottom: 20px; right: 80px; width: 150px; height: auto; opacity: 0.8; z-index: 100; filter: drop-shadow(0 0 15px var(--led-cyan)); pointer-events: none; }
 
         .app-container { position: relative; width: 450px; display: flex; justify-content: center; align-items: center; }
 
-        /* MISMO ESTILO QUE EL INDEX */
-        .glass-panel { background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(25px); border: 2px solid rgba(188, 19, 254, 0.2); width: 450px; height: 95vh; max-height: 780px; border-radius: 2.5rem; display: flex; flex-direction: column; padding: 2rem; box-sizing: border-box; overflow: hidden; }
+        /* PANEL UNIFICADO CON EL INDEX */
+        .glass-panel { 
+            background: rgba(0, 0, 0, 0.8); 
+            backdrop-filter: blur(25px); 
+            border: 2px solid rgba(188, 19, 254, 0.2); 
+            width: 450px; 
+            height: 95vh; 
+            max-height: 780px; 
+            border-radius: 2.5rem; 
+            display: flex; 
+            flex-direction: column; 
+            padding: 2rem; 
+            box-sizing: border-box; 
+            overflow: hidden; 
+        }
 
         .vol-sidebar { position: absolute; left: -90px; top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; align-items: center; width: 80px; }
         .vol-label { font-family: 'JetBrains Mono'; font-weight: bold; font-size: 11px; color: var(--led-cyan); text-shadow: 0 0 8px var(--led-cyan); margin-bottom: 90px; }
         .slider-wrapper { transform: rotate(-90deg); width: 200px; height: 20px; display: flex; align-items: center; justify-content: center; }
+        
         input[type=range].compat-slider { -webkit-appearance: none; width: 200px; height: 6px; background: rgba(0, 0, 0, 0.6); border: 1px solid rgba(188, 19, 254, 0.4); border-radius: 10px; outline: none; cursor: pointer; }
         input[type=range].compat-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; background: var(--p-glow); border: 2px solid #fff; border-radius: 4px; box-shadow: 0 0 10px var(--p-glow); }
 
@@ -58,6 +72,7 @@
         .log-container { background: rgba(0, 0, 0, 0.5); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 1.2rem; font-family: 'JetBrains Mono'; font-size: 0.75rem; padding: 1rem; flex-grow: 1; overflow-y: auto; color: var(--led-cyan); }
         
         .exit-btn { font-size: 8px; font-weight: 900; color: #ff3e3e; border: 1px solid rgba(255, 62, 62, 0.3); padding: 4px 8px; border-radius: 8px; margin-top: 12px; transition: 0.3s; }
+        .exit-btn:hover { background: rgba(255, 62, 62, 0.1); border-color: #ff3e3e; }
     </style>
 </head>
 <body>
@@ -134,7 +149,13 @@
         const timerDisplay = document.getElementById('timer-display');
         const timerCount = document.getElementById('timer-count');
         const volControl = document.getElementById('volControl');
-        const soundUrls = { EASY: "https://assets.mixkit.co/active_storage/sfx/2567/2567-preview.mp3", MEDIUM: "https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3", HARD: "https://assets.mixkit.co/active_storage/sfx/2573/2573-preview.mp3", WAY: "https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3" };
+        
+        const soundUrls = { 
+            EASY: "https://assets.mixkit.co/active_storage/sfx/2567/2567-preview.mp3", 
+            MEDIUM: "https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3", 
+            HARD: "https://assets.mixkit.co/active_storage/sfx/2573/2573-preview.mp3", 
+            WAY: "https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3" 
+        };
 
         const pusher = new Pusher(PUSHER_KEY, { cluster: 'us2', forceTLS: true });
         const channel = pusher.subscribe(`dungeon-room-${ROOM_ID}-${ROOM_PIN}`);
@@ -145,10 +166,12 @@
             const [name, type, mode, order] = payload.user.split('|');
             onlineUsers[name.toUpperCase()] = Date.now(); 
             renderOnline();
+            
             if (type === 'PULSE') return;
             
+            // LÓGICA DE VOLUMEN REPARADA
             const audio = new Audio(soundUrls[type]);
-            audio.volume = parseFloat(volControl.value);
+            audio.volume = parseFloat(volControl.value); // Usa el valor actual del slider
             audio.play().catch(()=>{});
 
             const colors = { EASY: '#00ff88', MEDIUM: '#facc15', HARD: '#ff3e3e', WAY: '#00f2ff' };
@@ -166,7 +189,10 @@
             if (!user || user.length < 2) return;
             if (type === 'WAY') { hasConfirmedWay = true; updateUI(); }
             try {
-                await fetch(CLOUDFLARE_URL, { method: 'POST', body: JSON.stringify({ user: `${user}|${type}|${currentMode}|${currentOrder}`, roomId: ROOM_ID, pin: ROOM_PIN }) });
+                await fetch(CLOUDFLARE_URL, { 
+                    method: 'POST', 
+                    body: JSON.stringify({ user: `${user}|${type}|${currentMode}|${currentOrder}`, roomId: ROOM_ID, pin: ROOM_PIN }) 
+                });
             } catch (e) {}
         }
 
@@ -176,6 +202,7 @@
             let s = 30;
             timerDisplay.classList.replace('opacity-0', 'opacity-100');
             timerCount.innerText = s;
+            timerDisplay.classList.remove('timer-warning');
             window.countdown = setInterval(() => {
                 s--; timerCount.innerText = s;
                 if (s <= 10) timerDisplay.classList.add('timer-warning');
@@ -219,16 +246,31 @@
             log.innerHTML = `<div style="color:${color}">> ${time} ${msg}</div>` + log.innerHTML;
         }
 
-        function setMode(mode) { currentMode = mode; document.getElementById('modeSL').classList.toggle('active', mode === 'SL'); document.getElementById('modeOP').classList.toggle('active', mode === 'OP'); }
-        function toggleOrder() { currentOrder = (currentOrder === 'DR') ? 'RD' : 'DR'; document.getElementById('orderLabel').innerText = (currentOrder === 'DR') ? 'D ➜ R' : 'R ➜ D'; }
+        function setMode(mode) { 
+            currentMode = mode; 
+            document.getElementById('modeSL').classList.toggle('active', mode === 'SL'); 
+            document.getElementById('modeOP').classList.toggle('active', mode === 'OP'); 
+        }
+        
+        function toggleOrder() { 
+            currentOrder = (currentOrder === 'DR') ? 'RD' : 'DR'; 
+            document.getElementById('orderLabel').innerText = (currentOrder === 'DR') ? 'D ➜ R' : 'R ➜ D'; 
+        }
+        
         function exitRoom() { sessionStorage.clear(); window.location.href = 'index.html'; }
 
+        // EVENTOS
         nameField.addEventListener('input', updateUI);
-        document.getElementById('volControl').addEventListener('input', (e) => document.getElementById('volLabel').innerText = Math.round(e.target.value * 100) + "%");
+        volControl.addEventListener('input', (e) => {
+            document.getElementById('volLabel').innerText = Math.round(e.target.value * 100) + "%";
+        });
+        
         document.getElementById('easyBtn').onclick = () => sendSignal('EASY');
         document.getElementById('medBtn').onclick = () => sendSignal('MEDIUM');
         document.getElementById('hardBtn').onclick = () => sendSignal('HARD');
         document.getElementById('wayBtn').onclick = () => sendSignal('WAY');
+        
+        // TIMERS DE PULSO
         setInterval(() => { if (nameField.value.trim().length >= 2) sendSignal('PULSE'); }, 10000);
         setInterval(renderOnline, 5000);
         setInterval(() => { fetch(CLOUDFLARE_URL, { method: 'POST', body: JSON.stringify({ roomName: ROOM_ID }) }); }, 20000);
