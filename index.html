@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login | Kitsu DevWorks</title>
+    <title>Dungeon Hub | Kitsu DevWorks</title>
     
     <link rel="icon" type="image/png" href="KitsuLogoMini.png">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     
     <style>
-        :root { --p-glow: #bc13fe; }
+        :root { --p-glow: #bc13fe; --led-cyan: #00f2ff; }
         
         body { 
             font-family: 'Orbitron', sans-serif; 
@@ -21,7 +21,7 @@
             position: relative;
         }
 
-        /* POSICIÓN DEL LOGO QUE TE GUSTABA */
+        /* LOGO POSICIÓN ORIGINAL 80px */
         .fixed-logo-index { 
             position: fixed; 
             bottom: 20px; 
@@ -33,34 +33,43 @@
             pointer-events: none; 
         }
 
-        .main-container {
+        .main-wrapper {
             display: flex;
             align-items: center;
-            gap: 20px;
-            position: relative;
+            gap: 25px;
         }
 
         .glass-card { 
-            background: rgba(0, 0, 0, 0.8); 
-            backdrop-filter: blur(20px); 
-            border: 2px solid rgba(188, 19, 254, 0.2); 
-            width: 400px; 
-            padding: 2.5rem; 
-            border-radius: 2.5rem; 
-            box-shadow: 0 0 40px rgba(188, 19, 254, 0.1);
-            z-index: 10;
+            background: rgba(0, 0, 0, 0.85); 
+            backdrop-filter: blur(25px); 
+            border: 2px solid rgba(188, 19, 254, 0.3); 
+            width: 420px; 
+            padding: 3rem; 
+            border-radius: 3rem; 
+            box-shadow: 0 0 50px rgba(188, 19, 254, 0.15);
+            position: relative;
         }
 
-        /* SIDEBAR DE SALAS ONLINE */
+        /* TÍTULO DUNGEON HUB ORIGINAL */
+        .hub-title {
+            background: linear-gradient(90deg, #bc13fe, #00f2ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 900;
+            font-style: italic;
+            letter-spacing: 4px;
+            filter: drop-shadow(0 0 10px rgba(188, 19, 254, 0.5));
+        }
+
         .rooms-sidebar { 
-            width: 150px; 
-            background: rgba(0, 0, 0, 0.6); 
+            width: 160px; 
+            background: rgba(0, 0, 0, 0.7); 
             border: 1px solid rgba(188, 19, 254, 0.2); 
-            border-left: 3px solid var(--p-glow); 
-            padding: 15px; 
-            border-radius: 0 20px 20px 0; 
-            backdrop-filter: blur(10px);
-            max-height: 350px;
+            border-left: 4px solid var(--p-glow); 
+            padding: 20px; 
+            border-radius: 0 25px 25px 0; 
+            backdrop-filter: blur(15px);
+            height: 380px;
             overflow-y: auto;
         }
 
@@ -68,97 +77,121 @@
             background: rgba(0, 0, 0, 0.6);
             border: 1px solid rgba(188, 19, 254, 0.3);
             color: white;
-            padding: 12px;
-            border-radius: 12px;
+            padding: 14px;
+            border-radius: 15px;
             width: 100%;
             font-family: 'JetBrains Mono';
             outline: none;
             transition: 0.3s;
             text-align: center;
+            font-size: 13px;
         }
 
-        .pro-input:focus { border-color: var(--p-glow); box-shadow: 0 0 15px rgba(188, 19, 254, 0.3); }
+        .pro-input:focus { border-color: var(--p-glow); box-shadow: 0 0 15px rgba(188, 19, 254, 0.4); }
 
         .btn-login {
             background: var(--p-glow);
             color: white;
             font-weight: 900;
-            padding: 14px;
-            border-radius: 12px;
+            padding: 16px;
+            border-radius: 15px;
             width: 100%;
             transition: 0.3s;
-            letter-spacing: 2px;
-            box-shadow: 0 0 20px rgba(188, 19, 254, 0.4);
+            letter-spacing: 3px;
+            box-shadow: 0 0 25px rgba(188, 19, 254, 0.5);
+            margin-top: 1rem;
         }
 
-        .btn-login:hover { transform: scale(1.02); filter: brightness(1.2); }
-        .logo-card { width: 150px; margin: 0 auto 1.5rem; display: block; filter: drop-shadow(0 0 10px var(--p-glow)); }
+        .btn-login:hover { transform: translateY(-2px); filter: brightness(1.2); }
 
         .room-item {
-            font-size: 10px;
+            font-size: 11px;
             color: #bc13fe;
-            margin-bottom: 8px;
+            margin-bottom: 12px;
             font-family: 'JetBrains Mono';
             display: flex;
             align-items: center;
-            gap: 5px;
+            gap: 8px;
+            font-weight: bold;
         }
-        .online-dot { width: 6px; height: 6px; background: #00ff88; border-radius: 50%; box-shadow: 0 0 5px #00ff88; }
+        .online-dot { width: 7px; height: 7px; background: #00ff88; border-radius: 50%; box-shadow: 0 0 8px #00ff88; animation: pulse 2s infinite; }
+        
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
     </style>
 </head>
 <body>
 
     <img src="KitsuLogo2.png" alt="Kitsu" class="fixed-logo-index">
 
-    <div class="main-container">
+    <div class="main-wrapper">
         <div class="glass-card">
-            <img src="KitsuLogo2.png" alt="Kitsu DevWorks" class="logo-card">
+            <div class="text-center mb-8">
+                <h1 class="text-4xl hub-title mb-2">DUNGEON HUB</h1>
+                <p class="text-[9px] text-purple-400 font-bold tracking-[0.4em] uppercase opacity-60">System Core v2.0</p>
+            </div>
             
-            <h2 class="text-white text-center text-[10px] font-black italic mb-6 tracking-[0.3em] opacity-80 uppercase">Access Gateway</h2>
-            
-            <div class="space-y-4">
+            <div class="space-y-5">
                 <div>
-                    <label class="text-[9px] text-purple-400 ml-2 mb-1 block font-bold uppercase">Nombre de Sala</label>
-                    <input type="text" id="roomName" placeholder="ROOM ID" class="pro-input uppercase">
+                    <label class="text-[10px] text-purple-400 ml-2 mb-2 block font-black uppercase">Nombre de Sala</label>
+                    <input type="text" id="roomName" placeholder="ENTER ROOM ID" class="pro-input uppercase">
                 </div>
                 
                 <div>
-                    <label class="text-[9px] text-purple-400 ml-2 mb-1 block font-bold uppercase">Pin de Acceso</label>
+                    <label class="text-[10px] text-purple-400 ml-2 mb-2 block font-black uppercase">Pin de Seguridad</label>
                     <input type="password" id="roomPin" placeholder="****" maxlength="4" class="pro-input">
                 </div>
 
-                <button onclick="enterRoom()" class="btn-login mt-4">INGRESAR</button>
+                <button onclick="enterRoom()" class="btn-login">CONECTAR</button>
             </div>
 
-            <p class="text-[8px] text-center text-white/20 mt-8 font-mono">KITSU DEVWORKS &copy; 2026<br>SECURE PROTOCOL ACTIVE</p>
+            <p class="text-[9px] text-center text-white/30 mt-10 font-mono tracking-widest">KITSU DEVWORKS &copy; 2026</p>
         </div>
 
         <div class="rooms-sidebar">
-            <div class="text-[8px] text-purple-400 font-black mb-4 uppercase tracking-widest">Salas Online</div>
+            <div class="text-[9px] text-purple-400 font-black mb-5 uppercase tracking-tighter border-b border-purple-500/20 pb-2">Salas Activas</div>
             <div id="activeRooms">
                 </div>
         </div>
     </div>
 
     <script>
-        function enterRoom() {
+        const CLOUDFLARE_URL = 'https://dungeon-hub-core.kitsu-devworks.workers.dev/';
+
+        async function enterRoom() {
             const name = document.getElementById('roomName').value.trim().toUpperCase();
             const pin = document.getElementById('roomPin').value.trim();
-            if (name.length < 3 || pin.length < 4) { alert("DATOS INVÁLIDOS"); return; }
+            if (name.length < 3 || pin.length < 4) { alert("DATOS DE ACCESO INVÁLIDOS"); return; }
+            
             sessionStorage.setItem('dungeon_room', name);
             sessionStorage.setItem('dungeon_pin', pin);
             window.location.href = 'control.html';
         }
 
-        // Simulación de actualización de salas (aquí pondrías tu fetch a Cloudflare si lo necesitas)
-        function updateActiveRooms() {
-            // Ejemplo de cómo se vería
-            // const rooms = ['SALA-01', 'SALA-X']; 
-            // document.getElementById('activeRooms').innerHTML = rooms.map(r => `<div class="room-item"><div class="online-dot"></div>${r}</div>`).join('');
+        async function fetchRooms() {
+            try {
+                const res = await fetch(CLOUDFLARE_URL);
+                const rooms = await res.json();
+                const container = document.getElementById('activeRooms');
+                if (rooms.length === 0) {
+                    container.innerHTML = '<div class="text-[8px] text-white/20 italic">No hay salas...</div>';
+                    return;
+                }
+                container.innerHTML = rooms.map(r => `
+                    <div class="room-item">
+                        <div class="online-dot"></div>
+                        ${r.name}
+                    </div>
+                `).join('');
+            } catch (e) {
+                console.log("Error cargando salas");
+            }
         }
 
         document.addEventListener('keypress', (e) => { if (e.key === 'Enter') enterRoom(); });
-        updateActiveRooms();
+        
+        // Actualizar salas cada 10 segundos
+        fetchRooms();
+        setInterval(fetchRooms, 10000);
     </script>
 </body>
 </html>
