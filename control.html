@@ -4,135 +4,257 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Dungeon Control | Kitsu DevWorks</title>
+    
+    <link rel="icon" type="image/png" href="KitsuLogoMini.png">
+    
     <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    
     <style>
         :root { --led-green: #00ff88; --led-yellow: #facc15; --led-red: #ff3e3e; --led-cyan: #00f2ff; }
-        body { font-family: 'Orbitron', sans-serif; background: radial-gradient(circle at center, #0a0a1a 0%, #020205 100%); height: 100vh; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-        .pro-title { background: linear-gradient(90deg, #00f2ff, #00ff88); -webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow(0 0 10px rgba(0, 242, 255, 0.3)); }
-        .fixed-logo { position: fixed; bottom: 10px; right: 5px; width: 110px; opacity: 0.6; pointer-events: none; filter: drop-shadow(0 0 5px var(--led-cyan)); }
-        .main-card { width: 450px; height: 95vh; background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(25px); border: 2px solid rgba(0, 242, 255, 0.2); border-radius: 2.5rem; display: flex; flex-direction: column; padding: 1.5rem; position: relative; }
         
-        /* PULSACIÓN LENTA USUARIOS */
-        @keyframes slowPulse { 0%, 100% { opacity: 1; filter: drop-shadow(0 0 2px var(--led-green)); } 50% { opacity: 0.4; } }
-        .user-dot { width: 8px; height: 8px; background: var(--led-green); border-radius: 50%; display: inline-block; margin-right: 8px; animation: slowPulse 3s infinite; }
+        body { font-family: 'Orbitron', sans-serif; background: radial-gradient(circle at center, #0a0a1a 0%, #020205 100%); height: 100vh; margin: 0; overflow: hidden; display: flex; align-items: center; justify-content: center; position: relative; }
+        
+        .pro-title { background: linear-gradient(90deg, #00f2ff, #00ff88); -webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow(0 0 10px rgba(0, 242, 255, 0.3)); letter-spacing: 2px; }
 
-        .game-opt { flex: 1; padding: 8px; font-size: 9px; cursor: pointer; transition: 0.3s; text-align: center; border-radius: 8px; font-weight: 900; color: rgba(255,255,255,0.3); }
+        .fixed-logo { position: fixed; bottom: 10px; right: 5px; width: 110px; height: auto; opacity: 0.6; z-index: 100; filter: drop-shadow(0 0 5px var(--led-cyan)); pointer-events: none; }
+
+        .app-container { position: relative; width: 450px; display: flex; justify-content: center; align-items: center; }
+
+        .vol-sidebar { position: absolute; left: -90px; top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; align-items: center; width: 80px; }
+        .vol-label { font-family: 'JetBrains Mono'; font-weight: bold; font-size: 11px; color: var(--led-cyan); text-shadow: 0 0 8px var(--led-cyan); margin-bottom: 90px; }
+        .slider-wrapper { transform: rotate(-90deg); width: 200px; height: 20px; display: flex; align-items: center; justify-content: center; }
+        input[type=range].compat-slider { -webkit-appearance: none; width: 200px; height: 6px; background: rgba(0, 0, 0, 0.6); border: 1px solid rgba(0, 242, 255, 0.4); border-radius: 10px; outline: none; cursor: pointer; }
+        input[type=range].compat-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; background: var(--led-cyan); border: 2px solid #fff; border-radius: 4px; box-shadow: 0 0 10px var(--led-cyan); }
+
+        .game-selector-container { display: flex; gap: 8px; width: 100%; margin-bottom: 10px; }
+        .game-selector { display: flex; background: rgba(0,0,0,0.4); border: 1px solid rgba(0,242,255,0.2); border-radius: 12px; padding: 4px; flex-grow: 1; }
+        .game-opt { flex: 1; padding: 8px; font-size: 9px; color: rgba(255,255,255,0.3); cursor: pointer; transition: 0.3s; text-align: center; border-radius: 8px; font-weight: 900; letter-spacing: 1px; }
         .game-opt.active { background: var(--led-cyan); color: #000; box-shadow: 0 0 10px var(--led-cyan); }
-        
-        .btn-raid { width: 85px; height: 85px; border-radius: 50%; opacity: 0.15; pointer-events: none; transition: 0.3s; border: 3px solid transparent; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .enabled { opacity: 1 !important; pointer-events: auto !important; }
-        .btn-raid:active { transform: scale(0.9); }
-        .btn-easy { border-color: var(--led-green); color: var(--led-green); }
-        .btn-medium { border-color: var(--led-yellow); color: var(--led-yellow); }
-        .btn-hard { border-color: var(--led-red); color: var(--led-red); }
 
-        .log-container { background: rgba(0,0,0,0.5); border-radius: 1.2rem; font-family: 'JetBrains Mono'; font-size: 0.7rem; padding: 1rem; flex-grow: 1; overflow-y: auto; color: var(--led-cyan); border: 1px solid rgba(255,255,255,0.05); }
-        .cooldown { pointer-events: none !important; opacity: 0.3 !important; }
-        .vol-sidebar { position: absolute; left: -80px; top: 50%; transform: rotate(-90deg) translateX(50%); width: 200px; }
+        .order-btn { width: 65px; background: rgba(0,0,0,0.4); border: 1px solid rgba(0,242,255,0.2); border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; color: var(--led-cyan); transition: 0.2s; }
+        .order-text { font-size: 8px; font-weight: 900; margin-top: -2px; }
+
+        .online-sidebar { position: absolute; right: -135px; top: 100px; width: 125px; background: rgba(0, 0, 0, 0.6); border: 1px solid rgba(0, 242, 255, 0.2); border-left: 3px solid var(--led-cyan); padding: 12px; border-radius: 0 15px 15px 0; backdrop-filter: blur(10px); }
+
+        .main-card { width: 450px; height: 95vh; max-height: 780px; background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(25px); border: 2px solid rgba(0, 242, 255, 0.2); border-radius: 2.5rem; display: flex; flex-direction: column; padding: 1rem; box-sizing: border-box; overflow: hidden; }
+
+        .btn-raid, .btn-way { opacity: 0.15; pointer-events: none; transition: all 0.3s; filter: grayscale(1); }
+        .enabled { opacity: 1 !important; pointer-events: auto !important; filter: grayscale(0) !important; }
+
+        .btn-raid { width: 85px; height: 85px; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 3px solid transparent; }
+        .btn-easy { border-color: var(--led-green); color: var(--led-green); box-shadow: 0 0 15px rgba(0, 255, 136, 0.3); }
+        .btn-medium { border-color: var(--led-yellow); color: var(--led-yellow); box-shadow: 0 0 15px rgba(250, 204, 21, 0.3); }
+        .btn-hard { border-color: var(--led-red); color: var(--led-red); box-shadow: 0 0 15px rgba(255, 62, 62, 0.3); }
+
+        .btn-way { width: 100%; padding: 16px; border-radius: 15px; border: 2px solid var(--led-cyan); color: var(--led-cyan); background: rgba(0, 242, 255, 0.1); font-weight: 900; text-transform: uppercase; font-size: 11px; letter-spacing: 2px; margin-top: 10px; }
+
+        .timer-block { height: 50px; width: 100%; display: flex; align-items: center; justify-content: center; margin: 2px 0; flex-shrink: 0; }
+        #timer-display { font-family: 'JetBrains Mono'; font-weight: 700; font-size: 1.8rem; color: var(--led-cyan); text-shadow: 0 0 15px var(--led-cyan); }
+        .timer-warning { color: var(--led-red) !important; animation: pulse-red 0.5s infinite alternate; }
+        @keyframes pulse-red { from { transform: scale(1); } to { transform: scale(1.1); } }
+
+        .log-container { background: rgba(0, 0, 0, 0.5); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 1.2rem; font-family: 'JetBrains Mono'; font-size: 0.75rem; padding: 1rem; flex-grow: 1; overflow-y: auto; color: var(--led-cyan); box-sizing: border-box; }
+        
+        .exit-btn { font-size: 8px; font-weight: 900; color: #ff3e3e; border: 1px solid rgba(255, 62, 62, 0.3); padding: 4px 8px; border-radius: 8px; margin-top: 8px; transition: 0.3s; }
+        .exit-btn:hover { background: rgba(255, 62, 62, 0.2); border-color: #ff3e3e; }
     </style>
 </head>
 <body>
-    <img src="KitsuLogo2.png" class="fixed-logo">
-    <div class="main-card">
-        <div class="text-center mb-4">
-            <p id="roomIDDisplay" class="text-[9px] text-cyan-500/50 font-mono">SALA: ---</p>
-            <h1 class="text-2xl font-black italic pro-title">DUNGEON CONTROL</h1>
-            <input type="text" id="userName" placeholder="NICKNAME" maxlength="8" class="bg-black/60 border border-cyan-500/30 text-white text-[10px] p-2 rounded mt-2 outline-none w-2/3 text-center uppercase">
+
+    <img src="KitsuLogo2.png" alt="Kitsu" class="fixed-logo">
+
+    <div class="app-container">
+        <div class="vol-sidebar">
+            <span id="volLabel" class="vol-label">50%</span>
+            <div class="slider-wrapper">
+                <input type="range" id="volControl" class="compat-slider" min="0" max="1" step="0.01" value="0.5">
+            </div>
         </div>
 
-        <div class="flex gap-2 mb-4 bg-black/40 p-1 rounded-xl border border-white/5">
-            <div id="modeSL" class="game-opt active" onclick="setMode('Solo Leveling')">SOLO LEVELING</div>
-            <div id="modeOP" class="game-opt" onclick="setMode('One Piece')">ONE PIECE</div>
+        <div class="main-card">
+            <div class="text-center">
+                <p id="roomDisplay" class="text-[8px] text-cyan-500/50 mb-1">CONNECTING...</p>
+                <h1 class="text-2xl font-black italic mb-1 pro-title">DUNGEON CONTROL</h1>
+                <input type="text" id="userName" placeholder="NICKNAME" maxlength="8" class="bg-black/60 border border-cyan-500/50 text-white text-[10px] p-2 rounded mb-3 font-mono outline-none w-2/3 text-center uppercase focus:border-cyan-400">
+            </div>
+
+            <div class="game-selector-container">
+                <div class="game-selector">
+                    <div id="modeSL" class="game-opt active" onclick="setMode('SL')">SOLO LEVELING</div>
+                    <div id="modeOP" class="game-opt" onclick="setMode('OP')">ONE PIECE</div>
+                </div>
+                <div id="orderBtn" class="order-btn" onclick="toggleOrder()">
+                    <span class="text-[12px]">🔄</span>
+                    <span id="orderLabel" class="order-text">D ➜ R</span>
+                </div>
+            </div>
+
+            <div class="flex justify-between px-1 mb-3">
+                <button id="easyBtn" class="btn-raid btn-easy"><span class="text-2xl">🛡️</span><span class="text-[8px] font-black uppercase mt-1">Easy</span></button>
+                <button id="medBtn" class="btn-raid btn-medium"><span class="text-2xl">⚔️</span><span class="text-[8px] font-black uppercase mt-1">Medium</span></button>
+                <button id="hardBtn" class="btn-raid btn-hard"><span class="text-2xl">💀</span><span class="text-[8px] font-black uppercase mt-1">Hard</span></button>
+            </div>
+
+            <button id="wayBtn" class="btn-way">🏃‍♂️ Confirmar en camino</button>
+
+            <div class="timer-block">
+                <div id="timer-display" class="opacity-0 transition-opacity duration-300">
+                    <span id="timer-count">30</span>s
+                </div>
+            </div>
+
+            <div id="log" class="log-container">> System Online...</div>
+            
+            <div class="flex justify-center">
+                <button onclick="exitRoom()" class="exit-btn uppercase">Salir de la sala</button>
+            </div>
         </div>
 
-        <div class="flex justify-between mb-4">
-            <button id="easyBtn" class="btn-raid btn-easy" onclick="sendSignal('EASY')">🛡️<span class="text-[8px] font-black mt-1">EASY</span></button>
-            <button id="medBtn" class="btn-raid btn-medium" onclick="sendSignal('MEDIUM')">⚔️<span class="text-[8px] font-black mt-1">MEDIUM</span></button>
-            <button id="hardBtn" class="btn-raid btn-hard" onclick="sendSignal('HARD')">💀<span class="text-[8px] font-black mt-1">HARD</span></button>
-        </div>
-
-        <button id="wayBtn" class="w-full py-4 rounded-xl border-2 border-cyan-400 text-cyan-400 font-black text-[10px] uppercase tracking-widest opacity-15 pointer-events-none" onclick="sendSignal('WAY')">🏃‍♂️ Confirmar en camino</button>
-        
-        <div class="h-12 flex items-center justify-center font-mono text-cyan-400 text-xl" id="timer-display"></div>
-
-        <div id="log" class="log-container"></div>
-
-        <div class="absolute -right-32 top-10 w-28 bg-black/60 p-3 rounded-r-xl border-l-2 border-cyan-400">
-            <p class="text-[8px] text-cyan-400/50 mb-2">ONLINE (<span id="userCount">0</span>)</p>
-            <div id="userList" class="space-y-1"></div>
+        <div class="online-sidebar">
+            <div class="text-[8px] opacity-50 mb-2 uppercase font-bold text-cyan-400">Online (<span id="userCount">0</span>)</div>
+            <div id="userList"></div>
         </div>
     </div>
 
     <script>
+        // RECUPERAR DATOS DE LA SALA PRIVADA
         const ROOM_ID = sessionStorage.getItem('dungeon_room');
         const ROOM_PIN = sessionStorage.getItem('dungeon_pin');
-        const WORKER = 'https://dungeon-hub-core.kitsu-devworks.workers.dev/';
-        let currentMode = 'Solo Leveling', onlineUsers = {}, isCooldown = false;
+        const PUSHER_KEY = '78831e6e7f703ddd4fb2';
+        const CLOUDFLARE_URL = 'https://dungeon-hub-core.kitsu-devworks.workers.dev/';
 
-        document.getElementById('roomIDDisplay').innerText = `SALA: ${ROOM_ID}`;
-        const pusher = new Pusher('78831e6e7f703ddd4fb2', { cluster: 'us2' });
+        if (!ROOM_ID) window.location.href = 'index.html';
+        document.getElementById('roomDisplay').innerText = `SALA PRIVADA: ${ROOM_ID}`;
+
+        let currentMode = 'SL', currentOrder = 'DR', isTimerActive = false, hasConfirmedWay = false, onlineUsers = {};
+
+        // ELEMENTOS
+        const nameField = document.getElementById('userName');
+        const diffButtons = document.querySelectorAll('.btn-raid');
+        const wayBtn = document.getElementById('wayBtn');
+        const timerDisplay = document.getElementById('timer-display');
+        const timerCount = document.getElementById('timer-count');
+        const volControl = document.getElementById('volControl');
+        const soundUrls = { EASY: "https://assets.mixkit.co/active_storage/sfx/2567/2567-preview.mp3", MEDIUM: "https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3", HARD: "https://assets.mixkit.co/active_storage/sfx/2573/2573-preview.mp3", WAY: "https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3" };
+
+        // PUSHER (CON CANAL DE SALA PRIVADA)
+        const pusher = new Pusher(PUSHER_KEY, { cluster: 'us2', forceTLS: true });
         const channel = pusher.subscribe(`dungeon-room-${ROOM_ID}-${ROOM_PIN}`);
-
-        const sounds = { EASY: new Audio("https://assets.mixkit.co/active_storage/sfx/2567/2567-preview.mp3"), MEDIUM: new Audio("https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3"), HARD: new Audio("https://assets.mixkit.co/active_storage/sfx/2573/2573-preview.mp3"), WAY: new Audio("https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3") };
 
         channel.bind('client-sos', (data) => {
             let payload = typeof data === 'string' ? JSON.parse(data) : data;
-            if (!payload.user) return;
-            const [name, type, mode] = payload.user.split('|');
-            onlineUsers[name.toUpperCase()] = Date.now();
+            if(!payload.user) return;
+
+            const [name, type, mode, order] = payload.user.split('|');
+            onlineUsers[name.toUpperCase()] = Date.now(); 
             renderOnline();
             if (type === 'PULSE') return;
-
-            sounds[type].play().catch(()=>{});
-            const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-            addLog(time, name.toUpperCase(), mode, type);
-            if (type !== 'WAY') startTimer();
-        });
-
-        async function sendSignal(type) {
-            if (isCooldown) return;
-            const user = document.getElementById('userName').value.trim();
-            if (user.length < 2) return;
             
-            // Anti-spam de 3 segundos
-            isCooldown = true; document.querySelectorAll('button').forEach(b => b.classList.add('cooldown'));
-            setTimeout(() => { isCooldown = false; document.querySelectorAll('button').forEach(b => b.classList.remove('cooldown')); }, 3000);
+            playAlert(type);
+            const colors = { EASY: '#00ff88', MEDIUM: '#facc15', HARD: '#ff3e3e', WAY: '#00f2ff' };
+            const gameLabel = mode === 'OP' ? 'ONE PIECE' : 'SOLO LEVELING';
 
-            await fetch(WORKER, { method: 'POST', body: JSON.stringify({ user: `${user}|${type}|${currentMode}`, roomId: ROOM_ID, pin: ROOM_PIN }) });
-        }
-
-        function addLog(time, user, mode, type) {
-            const log = document.getElementById('log');
-            const msg = type === 'WAY' ? 'ESTÁ EN CAMINO' : `PIDE ${type}`;
-            log.innerHTML = `<div class="mb-1 border-b border-white/5 pb-1"><span class="text-[8px] opacity-40">[${time}]</span> <span class="font-bold text-white">${user}</span> <span class="text-[9px] opacity-60">(${mode})</span> <br> <span class="text-white/80">${msg}</span></div>` + log.innerHTML;
-        }
-
-        function setMode(m) { currentMode = m; document.getElementById('modeSL').classList.toggle('active', m === 'Solo Leveling'); document.getElementById('modeOP').classList.toggle('active', m === 'One Piece'); }
-        
-        function renderOnline() {
-            let html = '', count = 0, now = Date.now();
-            for (let u in onlineUsers) {
-                if (now - onlineUsers[u] > 35000) { delete onlineUsers[u]; continue; }
-                html += `<div class="text-[9px] flex items-center text-cyan-400"><span class="user-dot"></span>${u}</div>`; count++;
+            if (type !== 'WAY') {
+                startTimer();
+                let actionMsg = order === 'RD' ? `PIDE RAID Y DUNG ${type}` : `PIDE DUNG ${type} Y RAID`;
+                addLog(`[${gameLabel}] ¡${name.toUpperCase()} ${actionMsg}!`, colors[type]);
+            } else {
+                addLog(`${name.toUpperCase()} VA EN CAMINO!`, colors.WAY);
             }
-            document.getElementById('userList').innerHTML = html; document.getElementById('userCount').innerText = count;
+        });
+
+        // FUNCIONES DE CONTROL
+        async function sendSignal(type) {
+            const user = nameField.value.trim();
+            if (!user || user.length < 2) return;
+            if (type === 'WAY') { hasConfirmedWay = true; updateUI(); }
+            
+            try {
+                await fetch(CLOUDFLARE_URL, { 
+                    method: 'POST', 
+                    body: JSON.stringify({ 
+                        user: `${user}|${type}|${currentMode}|${currentOrder}`,
+                        roomId: ROOM_ID,
+                        pin: ROOM_PIN
+                    }) 
+                });
+            } catch (e) {}
         }
 
-        document.getElementById('userName').addEventListener('input', (e) => {
-            const ok = e.target.value.length >= 2;
-            document.querySelectorAll('.btn-raid, #wayBtn').forEach(b => b.classList.toggle('enabled', ok));
-        });
+        function playAlert(type) {
+            const audio = new Audio(soundUrls[type]);
+            audio.volume = parseFloat(volControl.value);
+            audio.play().catch(e => console.log("Sound play error"));
+        }
 
         function startTimer() {
-            let s = 30; const disp = document.getElementById('timer-display');
-            const it = setInterval(() => { disp.innerText = `${s--}s`; if (s < 0) { clearInterval(it); disp.innerText = ''; } }, 1000);
+            clearInterval(window.countdown);
+            isTimerActive = true; hasConfirmedWay = false; updateUI();
+            let s = 30;
+            timerDisplay.classList.replace('opacity-0', 'opacity-100');
+            timerCount.innerText = s;
+            timerDisplay.classList.remove('timer-warning');
+            window.countdown = setInterval(() => {
+                s--; timerCount.innerText = s;
+                if (s <= 10) timerDisplay.classList.add('timer-warning');
+                if (s <= 0) {
+                    clearInterval(window.countdown);
+                    isTimerActive = false;
+                    timerDisplay.classList.replace('opacity-100', 'opacity-0');
+                    updateUI();
+                }
+            }, 1000);
         }
 
-        // Pulso de actividad y señal al Lobby
-        setInterval(() => { if(document.getElementById('userName').value.length >= 2) sendSignal('PULSE'); }, 10000);
-        setInterval(() => { fetch(WORKER, { method: 'POST', body: JSON.stringify({ roomName: ROOM_ID }) }); }, 20000);
+        function updateUI() {
+            const hasName = nameField.value.trim().length >= 2;
+            if (!hasName) { diffButtons.forEach(b => b.classList.remove('enabled')); wayBtn.classList.remove('enabled'); return; }
+            if (isTimerActive) {
+                diffButtons.forEach(b => b.classList.remove('enabled'));
+                (!hasConfirmedWay) ? wayBtn.classList.add('enabled') : wayBtn.classList.remove('enabled');
+            } else {
+                diffButtons.forEach(b => b.classList.add('enabled'));
+                wayBtn.classList.remove('enabled');
+            }
+        }
+
+        function renderOnline() {
+            const now = Date.now();
+            let html = '', count = 0;
+            for (let u in onlineUsers) {
+                if (now - onlineUsers[u] > 40000) { delete onlineUsers[u]; continue; }
+                html += `<div class="flex items-center gap-2 text-[9px] text-cyan-400 mb-1"><div class="w-1.5 h-1.5 bg-green-500 rounded-full shadow-[0_0_5px_#00ff88] animate-pulse"></div>${u.toUpperCase()}</div>`;
+                count++;
+            }
+            document.getElementById('userList').innerHTML = html;
+            document.getElementById('userCount').innerText = count;
+        }
+
+        function addLog(msg, color) {
+            const log = document.getElementById('log');
+            const now = new Date();
+            const timeStr = `[${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}]`;
+            log.innerHTML = `<div style="color:${color}">> ${timeStr} ${msg}</div>` + log.innerHTML;
+        }
+
+        function setMode(mode) { currentMode = mode; document.getElementById('modeSL').classList.toggle('active', mode === 'SL'); document.getElementById('modeOP').classList.toggle('active', mode === 'OP'); }
+        function toggleOrder() { currentOrder = (currentOrder === 'DR') ? 'RD' : 'DR'; document.getElementById('orderLabel').innerText = (currentOrder === 'DR') ? 'D ➜ R' : 'R ➜ D'; }
+        function exitRoom() { sessionStorage.clear(); window.location.href = 'index.html'; }
+
+        // EVENTOS Y TIMERS
+        nameField.addEventListener('input', updateUI);
+        volControl.addEventListener('input', (e) => document.getElementById('volLabel').innerText = Math.round(e.target.value * 100) + "%");
+        document.getElementById('easyBtn').onclick = () => sendSignal('EASY');
+        document.getElementById('medBtn').onclick = () => sendSignal('MEDIUM');
+        document.getElementById('hardBtn').onclick = () => sendSignal('HARD');
+        document.getElementById('wayBtn').onclick = () => sendSignal('WAY');
+
+        setInterval(() => { if (nameField.value.trim().length >= 2) sendSignal('PULSE'); }, 10000);
+        setInterval(renderOnline, 5000);
+        // Pulso para el Lobby
+        setInterval(() => { fetch(CLOUDFLARE_URL, { method: 'POST', body: JSON.stringify({ roomName: ROOM_ID }) }); }, 20000);
     </script>
 </body>
 </html>
