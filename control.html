@@ -43,7 +43,7 @@
         .vol-sidebar { position: absolute; left: -90px; top: 60%; transform: translateY(-50%); display: flex; flex-direction: column; align-items: center; width: 80px; }
         .vol-label { font-family: 'JetBrains Mono'; font-weight: bold; font-size: 11px; color: var(--led-cyan); text-shadow: 0 0 8px var(--led-cyan); margin-bottom: 90px; }
         .slider-wrapper { transform: rotate(-90deg); width: 200px; height: 20px; display: flex; align-items: center; justify-content: center; }
-        input[type=range].compat-slider { -webkit-appearance: none; width: 200px; height: 6px; background: rgba(0,0,0,0.6); border: 1px solid rgba(188, 19, 254, 0.4); border-radius: 10px; outline: none; cursor: pointer; }
+        input[type=range].compat-slider { -webkit-appearance: none; width: 200px; height: 6px; background: rgba(0, 0, 0, 0.6); border: 1px solid rgba(188, 19, 254, 0.4); border-radius: 10px; outline: none; cursor: pointer; }
         input[type=range].compat-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; background: var(--p-glow); border: 2px solid #fff; border-radius: 4px; box-shadow: 0 0 10px var(--p-glow); }
 
         .online-sidebar { position: absolute; right: -135px; top: 100px; width: 125px; background: rgba(0, 0, 0, 0.6); border: 1px solid rgba(188, 19, 254, 0.2); border-left: 3px solid var(--p-glow); padding: 12px; border-radius: 0 15px 15px 0; backdrop-filter: blur(10px); }
@@ -198,11 +198,11 @@
                 if (type === 'WAY') { addLog(`${name.toUpperCase()} VA EN CAMINO!`, colors[type]); } 
                 else { 
                     startTimer(); 
-                    // Lógica de formateo inteligente para el Log
-                    const formattedMissions = missionChain.split(' y ').map(m => {
+                    // Lógica de formateo inteligente para el Log (usando flechas)
+                    const formattedMissions = missionChain.split(' ➜ ').map(m => {
                         if (m === 'DUNGEON') return `[${gameMode === 'SL' ? 'SoloLeveling' : 'OnePiece'}] DUNGEON ${type}`;
                         return m;
-                    }).join(' y ');
+                    }).join(' ➜ ');
                     addLog(`${name.toUpperCase()} PIDE: ${formattedMissions}`, colors[type]); 
                 }
             }
@@ -212,7 +212,8 @@
             const user = nameField.value.trim();
             if (user.length < 2) return;
             if (type === 'WAY') { if (hasConfirmedWay) return; hasConfirmedWay = true; updateUI(); }
-            const activeMissions = missions.filter(m => m.active).map(m => m.name).join(' y ');
+            // Creamos la cadena usando flechas limpias
+            const activeMissions = missions.filter(m => m.active).map(m => m.name).join(' ➜ ');
             try {
                 await fetch(CLOUDFLARE_URL, {
                     method: 'POST',
